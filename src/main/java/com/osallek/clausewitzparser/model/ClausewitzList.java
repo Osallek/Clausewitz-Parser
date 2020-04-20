@@ -1,5 +1,7 @@
 package com.osallek.clausewitzparser.model;
 
+import com.osallek.clausewitzparser.common.Utils;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,6 +38,36 @@ public final class ClausewitzList extends ClausewitzObject {
         return this.values.get(id);
     }
 
+    public Integer getAsInt(int id) {
+        String var = get(id);
+
+        if (Utils.isNotBlank(var)) {
+            return Integer.parseInt(var);
+        } else {
+            return null;
+        }
+    }
+
+    public Double getAsDouble(int id) {
+        String var = get(id);
+
+        if (Utils.isNotBlank(var)) {
+            return Double.parseDouble(var);
+        } else {
+            return null;
+        }
+    }
+
+    public Boolean getAsBool(int id) {
+        String var = get(id);
+
+        if (Utils.isNotBlank(var)) {
+            return "yes".equals(var);
+        } else {
+            return null;
+        }
+    }
+
     public int size() {
         return values.size();
     }
@@ -68,6 +100,26 @@ public final class ClausewitzList extends ClausewitzObject {
         this.values.add(Double.toString(val));
     }
 
+    public void add(boolean val) {
+        this.values.add(val ? "yes" : "no");
+    }
+
+    public void set(int id, String val) {
+        this.values.set(id, val);
+    }
+
+    public void set(int id, int val) {
+        set(id, Integer.toString(val));
+    }
+
+    public void set(int id, double val) {
+        set(id, Double.toString(val));
+    }
+
+    public void set(int id, boolean val) {
+        set(id, val ? "yes" : "no");
+    }
+
     public void addAll(List<String> values) {
         for (String s : values) {
             add(s);
@@ -85,11 +137,15 @@ public final class ClausewitzList extends ClausewitzObject {
     }
 
     public List<String> getValues() {
-        return new ArrayList<>(values);
+        return new ArrayList<>(this.values);
     }
 
     public boolean isSameLine() {
-        return sameLine;
+        return this.sameLine;
+    }
+
+    public boolean isEmpty() {
+        return this.values.isEmpty();
     }
 
     @Override

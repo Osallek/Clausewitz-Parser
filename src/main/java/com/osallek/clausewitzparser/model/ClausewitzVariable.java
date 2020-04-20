@@ -1,5 +1,7 @@
 package com.osallek.clausewitzparser.model;
 
+import com.osallek.clausewitzparser.common.Utils;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Objects;
@@ -19,7 +21,37 @@ public final class ClausewitzVariable extends ClausewitzObject {
     }
 
     public String getValue() {
-        return value;
+        return this.value;
+    }
+
+    public Integer getAsInt() {
+        String var = getValue();
+
+        if (Utils.isNotBlank(var)) {
+            return Integer.parseInt(var);
+        } else {
+            return null;
+        }
+    }
+
+    public Double getAsDouble() {
+        String var = getValue();
+
+        if (Utils.isNotBlank(var)) {
+            return Double.parseDouble(var);
+        } else {
+            return null;
+        }
+    }
+
+    public Boolean getAsBool() {
+        String var = getValue();
+
+        if (Utils.isNotBlank(var)) {
+            return "yes".equals(var);
+        } else {
+            return null;
+        }
     }
 
     public void setValue(String value) {
@@ -32,6 +64,10 @@ public final class ClausewitzVariable extends ClausewitzObject {
 
     public void setValue(double value) {
         this.value = Double.toString(value);
+    }
+
+    public void setValue(boolean value) {
+        this.value = value ? "yes" : "no";
     }
 
     @Override
