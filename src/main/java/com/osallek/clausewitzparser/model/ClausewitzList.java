@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public final class ClausewitzList extends ClausewitzObject {
 
@@ -69,19 +70,28 @@ public final class ClausewitzList extends ClausewitzObject {
     }
 
     public int size() {
-        return values.size();
+        return this.values.size();
     }
 
     public int indexOf(String val) {
-        return values.indexOf(val);
+        return this.values.indexOf(val);
     }
 
     public void remove(int id) {
-        values.remove(id);
+        this.values.remove(id);
     }
 
-    public boolean delete(String val) {
-        return values.remove(val);
+    public void remove(String value) {
+        for (int i = 0; i < this.values.size(); i++) {
+            if (this.values.get(i).equalsIgnoreCase(value)) {
+                this.values.remove(i);
+                break;
+            }
+        }
+    }
+
+    public void removeAll(String value) {
+        this.values.removeIf(s -> s.equalsIgnoreCase(value));
     }
 
     public void clear() {
@@ -126,8 +136,26 @@ public final class ClausewitzList extends ClausewitzObject {
         }
     }
 
-    public void addAll(String[] values) {
+    public void addAll(String... values) {
         for (String s : values) {
+            add(s);
+        }
+    }
+
+    public void addAll(Integer... values) {
+        for (Integer s : values) {
+            add(s);
+        }
+    }
+
+    public void addAll(Double... values) {
+        for (Double s : values) {
+            add(s);
+        }
+    }
+
+    public void addAll(Boolean... values) {
+        for (Boolean s : values) {
             add(s);
         }
     }
@@ -136,8 +164,32 @@ public final class ClausewitzList extends ClausewitzObject {
         return this.values.contains(val);
     }
 
+    public boolean contains(int val) {
+        return this.contains(String.valueOf(val));
+    }
+
+    public boolean contains(double val) {
+        return this.contains(String.valueOf(val));
+    }
+
+    public boolean contains(boolean val) {
+        return this.contains(val ? "yes" : "no");
+    }
+
     public List<String> getValues() {
         return new ArrayList<>(this.values);
+    }
+
+    public List<Integer> getValuesAsInt() {
+        return getValues().stream().map(Integer::parseInt).collect(Collectors.toList());
+    }
+
+    public List<Double> getValuesAsDouble() {
+        return getValues().stream().map(Double::parseDouble).collect(Collectors.toList());
+    }
+
+    public List<Boolean> getValuesAsBool() {
+        return getValues().stream().map("yes"::equalsIgnoreCase).collect(Collectors.toList());
     }
 
     public boolean isSameLine() {

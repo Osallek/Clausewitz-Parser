@@ -4,6 +4,9 @@ import com.osallek.clausewitzparser.common.Utils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 public final class ClausewitzVariable extends ClausewitzObject {
@@ -13,6 +16,26 @@ public final class ClausewitzVariable extends ClausewitzObject {
     public ClausewitzVariable(ClausewitzObject parent, String name, int order, String value) {
         super(name, parent, order);
         this.value = value;
+    }
+
+    public ClausewitzVariable(ClausewitzObject parent, String name, int order, int value) {
+        super(name, parent, order);
+        setValue(value);
+    }
+
+    public ClausewitzVariable(ClausewitzObject parent, String name, int order, double value) {
+        super(name, parent, order);
+        setValue(value);
+    }
+
+    public ClausewitzVariable(ClausewitzObject parent, String name, int order, boolean value) {
+        super(name, parent, order);
+        setValue(value);
+    }
+
+    public ClausewitzVariable(ClausewitzObject parent, String name, int order, Date value) {
+        super(name, parent, order);
+        setValue(value);
     }
 
     public ClausewitzVariable(ClausewitzVariable other) {
@@ -54,6 +77,20 @@ public final class ClausewitzVariable extends ClausewitzObject {
         }
     }
 
+    public Date getAsDate() {
+        String var = getValue();
+
+        if (Utils.isNotBlank(var)) {
+            try {
+                return Utils.stringToDate(var);
+            } catch (ParseException e) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     public void setValue(String value) {
         this.value = value;
     }
@@ -63,11 +100,15 @@ public final class ClausewitzVariable extends ClausewitzObject {
     }
 
     public void setValue(double value) {
-        this.value = Double.toString(value);
+        this.value = String.format(Locale.ENGLISH, "%.3f", value);
     }
 
     public void setValue(boolean value) {
         this.value = value ? "yes" : "no";
+    }
+
+    public void setValue(Date value) {
+        this.value = Utils.dateToString(value);
     }
 
     @Override

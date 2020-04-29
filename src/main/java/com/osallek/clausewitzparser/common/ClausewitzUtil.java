@@ -8,7 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.logging.Level;
@@ -26,7 +26,7 @@ public class ClausewitzUtil {
     public static ClausewitzItem load(File file, int skip) {
         ClausewitzItem root = null;
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), Charset.forName("windows-1252"))) {
             for (int i = 1; i <= skip; i++) {
                 reader.readLine();
             }
@@ -108,6 +108,11 @@ public class ClausewitzUtil {
                     currentLine = currentLine.substring(0, trimmed.length() - 1);
                     reader.reset();
                     reader.skip(currentLine.length());
+                } else if (Utils.hasAtLeast(trimmed, '=', 2)) {
+                    indexOf = currentLine.indexOf(' ', currentLine.indexOf('='));
+                    currentLine = currentLine.substring(0, indexOf);
+                    reader.reset();
+                    reader.skip(currentLine.length());
                 }
 
                 currentLine = currentLine.trim();
@@ -139,11 +144,11 @@ public class ClausewitzUtil {
                                                                                               .trim());
                 } else {
                     //No distinctive sign, value in a list
-                    if (Utils.hasQuotes(currentLine) && currentLine.indexOf(' ') >= 0) {
+                    if (!Utils.hasQuotes(currentLine) && currentLine.indexOf(' ') >= 0) {
                         //List on a single line
                         currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(),
-                                                                                         currentLine.split(" "),
-                                                                                         true);
+                                                                                         true,
+                                                                                         currentLine.split(" "));
 
                         ((ClausewitzItem) currentNode.getParent()).removeLastChild(currentNode.getName());
                         previousLineType = ClausewitzLineType.LIST_SAME_LINE;

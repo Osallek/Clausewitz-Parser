@@ -1,11 +1,10 @@
 package com.osallek.clausewitzparser.model;
 
-import com.osallek.clausewitzparser.common.Utils;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public final class ClausewitzItem extends ClausewitzObject {
@@ -24,11 +23,11 @@ public final class ClausewitzItem extends ClausewitzObject {
         this(null, "root", 0);
     }
 
-    ClausewitzItem(ClausewitzItem parent, String name, int order) {
+    public ClausewitzItem(ClausewitzItem parent, String name, int order) {
         this(parent, name, order, true);
     }
 
-    ClausewitzItem(ClausewitzItem parent, String name, int order, boolean hasEquals) {
+    public ClausewitzItem(ClausewitzItem parent, String name, int order, boolean hasEquals) {
         super(name, parent, order);
         this.hasEquals = hasEquals;
         this.children = new ArrayList<>();
@@ -36,7 +35,7 @@ public final class ClausewitzItem extends ClausewitzObject {
         this.lists = new ArrayList<>();
     }
 
-    ClausewitzItem(ClausewitzItem other) {
+    public ClausewitzItem(ClausewitzItem other) {
         super(other);
         this.children = other.children;
         this.variables = other.variables;
@@ -67,6 +66,24 @@ public final class ClausewitzItem extends ClausewitzObject {
         return child;
     }
 
+    public void removeChild(int id) {
+        this.children.remove(id);
+    }
+
+    public void removeChild(String childName, int id) {
+        int j = 0;
+        for (int i = 0; i < this.children.size(); i++) {
+            if (this.children.get(i).getName().equalsIgnoreCase(childName)) {
+                if (j == id) {
+                    this.children.remove(i);
+                    break;
+                }
+
+                j++;
+            }
+        }
+    }
+
     public void removeChild(String childName) {
         for (int i = 0; i < this.children.size(); i++) {
             if (this.children.get(i).getName().equalsIgnoreCase(childName)) {
@@ -85,6 +102,10 @@ public final class ClausewitzItem extends ClausewitzObject {
         }
     }
 
+    public void removeAllChildren() {
+        this.children.clear();
+    }
+
     public void addVariable(ClausewitzVariable variable) {
         if (variable == null) {
             throw new NullPointerException("Can't add a null variable");
@@ -99,6 +120,90 @@ public final class ClausewitzItem extends ClausewitzObject {
         ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value);
         addVariable(variable);
         return variable;
+    }
+
+    public ClausewitzVariable addVariable(String name, int value) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value);
+        addVariable(variable);
+        return variable;
+    }
+
+    public ClausewitzVariable addVariable(String name, double value) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value);
+        addVariable(variable);
+        return variable;
+    }
+
+    public ClausewitzVariable addVariable(String name, boolean value) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value);
+        addVariable(variable);
+        return variable;
+    }
+
+    public ClausewitzVariable addVariable(String name, Date value) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value);
+        addVariable(variable);
+        return variable;
+    }
+
+    public void removeVariable(int id) {
+        this.variables.remove(id);
+    }
+
+    public void removeVariable(String varName, int id) {
+        int j = 0;
+        for (int i = 0; i < this.variables.size(); i++) {
+            if (this.variables.get(i).getName().equalsIgnoreCase(varName)) {
+                j++;
+
+                if (j == id) {
+                    this.variables.remove(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void removeVariable(String varName) {
+        for (int i = 0; i < this.variables.size(); i++) {
+            if (this.variables.get(i).getName().equalsIgnoreCase(varName)) {
+                this.variables.remove(i);
+                break;
+            }
+        }
+    }
+
+    public void removeVariable(String varName, String value) {
+        for (int i = 0; i < this.variables.size(); i++) {
+            ClausewitzVariable variable = this.variables.get(i);
+
+            if (variable.getName().equalsIgnoreCase(varName) && variable.getValue().equalsIgnoreCase(value)) {
+                this.variables.remove(i);
+                break;
+            }
+        }
+    }
+
+    public void removeLastVariable(String varName) {
+        for (int i = this.variables.size() - 1; i >= 0; i--) {
+            if (this.variables.get(i).getName().equalsIgnoreCase(varName)) {
+                this.variables.remove(i);
+                break;
+            }
+        }
+    }
+
+    public void removeAllVariables() {
+        this.variables.clear();
+    }
+
+    public void removeVariableByValue(String value) {
+        for (int i = 0; i < this.variables.size(); i++) {
+            if (this.variables.get(i).getValue().equalsIgnoreCase(value)) {
+                this.variables.remove(i);
+                break;
+            }
+        }
     }
 
     public ClausewitzList addList(ClausewitzList list) {
@@ -159,7 +264,15 @@ public final class ClausewitzItem extends ClausewitzObject {
         return list;
     }
 
-    public ClausewitzList addList(String name, String[] values) {
+    public ClausewitzList addList(String name, Integer value) {
+        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        list.add(value);
+        addList(list);
+
+        return list;
+    }
+
+    public ClausewitzList addList(String name, String... values) {
         ClausewitzList list = new ClausewitzList(this, name, this.index);
         list.addAll(values);
         addList(list);
@@ -167,7 +280,7 @@ public final class ClausewitzItem extends ClausewitzObject {
         return list;
     }
 
-    public ClausewitzList addList(String name, String[] values, boolean sameLine) {
+    public ClausewitzList addList(String name, boolean sameLine, String... values) {
         ClausewitzList list = new ClausewitzList(this, name, this.index, sameLine);
         list.addAll(values);
         addList(list);
@@ -181,6 +294,53 @@ public final class ClausewitzItem extends ClausewitzObject {
         addList(list);
 
         return list;
+    }
+
+    public ClausewitzList addList(String name, Integer... values) {
+        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        list.addAll(values);
+        addList(list);
+
+        return list;
+    }
+
+    public ClausewitzList addList(String name, Double... values) {
+        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        list.addAll(values);
+        addList(list);
+
+        return list;
+    }
+
+    public ClausewitzList addList(String name, Boolean... values) {
+        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        list.addAll(values);
+        addList(list);
+
+        return list;
+    }
+
+    public void removeList(int id) {
+        this.lists.remove(id);
+    }
+
+    public void removeList(String varName) {
+        for (int i = 0; i < this.lists.size(); i++) {
+            if (this.lists.get(i).getName().equalsIgnoreCase(varName)) {
+                this.lists.remove(i);
+                break;
+            }
+        }
+    }
+
+    public void removeAllLists() {
+        this.lists.clear();
+    }
+
+    public void removeAll() {
+        this.removeAllChildren();
+        this.removeAllVariables();
+        this.removeAllLists();
     }
 
     public int getNbChildren() {
@@ -236,6 +396,7 @@ public final class ClausewitzItem extends ClausewitzObject {
 
         return list;
     }
+
     public ClausewitzList getList(String listName) {
         for (ClausewitzList list : this.lists) {
             if (list.getName().equalsIgnoreCase(listName)) {
@@ -254,14 +415,34 @@ public final class ClausewitzItem extends ClausewitzObject {
         }
     }
 
-    public String getVarAsString(String varName) {
+    public ClausewitzVariable getVar(String varName) {
         for (ClausewitzVariable var : this.variables) {
             if (var.getName().equalsIgnoreCase(varName)) {
-                return var.getValue();
+                return var;
             }
         }
 
         return null;
+    }
+
+    public ClausewitzVariable getLastVar(String varName) {
+        for (int i = this.variables.size() - 1; i >= 0; i--) {
+            if (this.variables.get(i).getName().equalsIgnoreCase(varName)) {
+                return this.variables.get(i);
+            }
+        }
+
+        return null;
+    }
+
+    public String getVarAsString(String varName) {
+        ClausewitzVariable var = getVar(varName);
+
+        if (var != null) {
+            return var.getValue();
+        } else {
+            return null;
+        }
     }
 
     public String getLastVarAsString(String varName) {
@@ -297,53 +478,43 @@ public final class ClausewitzItem extends ClausewitzObject {
     }
 
     public Integer getVarAsInt(String varName) {
-        String var = getVarAsString(varName);
-
-        if (Utils.isNotBlank(var)) {
-            return Integer.parseInt(var);
-        } else {
-            return null;
-        }
+        ClausewitzVariable var = getVar(varName);
+        return var == null ? null : var.getAsInt();
     }
 
     public Integer getLastVarAsInt(String varName) {
-        String var = getLastVarAsString(varName);
-
-        if (Utils.isNotBlank(var)) {
-            return Integer.parseInt(var);
-        } else {
-            return null;
-        }
+        ClausewitzVariable var = getLastVar(varName);
+        return var == null ? null : var.getAsInt();
     }
 
     public Double getVarAsDouble(String varName) {
-        String var = getVarAsString(varName);
-
-        if (Utils.isNotBlank(var)) {
-            return Double.parseDouble(var);
-        } else {
-            return null;
-        }
+        ClausewitzVariable var = getVar(varName);
+        return var == null ? null : var.getAsDouble();
     }
 
     public Double getLastVarAsDouble(String varName) {
-        String var = getLastVarAsString(varName);
-
-        if (Utils.isNotBlank(var)) {
-            return Double.parseDouble(var);
-        } else {
-            return null;
-        }
+        ClausewitzVariable var = getLastVar(varName);
+        return var == null ? null : var.getAsDouble();
     }
 
     public Boolean getVarAsBool(String varName) {
-        String var = getVarAsString(varName);
-        return var == null ? null : var.equalsIgnoreCase("yes");
+        ClausewitzVariable var = getVar(varName);
+        return var == null ? null : var.getAsBool();
     }
 
     public Boolean getLastVarAsBool(String varName) {
-        String var = getLastVarAsString(varName);
-        return var == null ? null : var.equalsIgnoreCase("yes");
+        ClausewitzVariable var = getLastVar(varName);
+        return var == null ? null : var.getAsBool();
+    }
+
+    public Date getVarAsDate(String varName) {
+        ClausewitzVariable var = getVar(varName);
+        return var == null ? null : var.getAsDate();
+    }
+
+    public Date getLastVarAsDate(String varName) {
+        ClausewitzVariable var = getLastVar(varName);
+        return var == null ? null : var.getAsDate();
     }
 
     public List<ClausewitzItem> getChildren() {
@@ -365,6 +536,29 @@ public final class ClausewitzItem extends ClausewitzObject {
         objects.sort(Comparator.comparingInt(ClausewitzObject::getOrder));
 
         return objects;
+    }
+
+    public void removeByOrder(int order) {
+        for (int i = 0; i < this.lists.size(); i++) {
+            if (this.lists.get(i).getOrder() == order) {
+                this.lists.remove(i);
+                break;
+            }
+        }
+
+        for (int i = 0; i < this.variables.size(); i++) {
+            if (this.variables.get(i).getOrder() == order) {
+                this.variables.remove(i);
+                break;
+            }
+        }
+
+        for (int i = 0; i < this.children.size(); i++) {
+            if (this.children.get(i).getOrder() == order) {
+                this.children.remove(i);
+                break;
+            }
+        }
     }
 
     @Override
