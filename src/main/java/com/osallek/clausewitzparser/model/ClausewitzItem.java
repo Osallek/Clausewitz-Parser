@@ -111,6 +111,10 @@ public final class ClausewitzItem extends ClausewitzObject {
             throw new NullPointerException("Can't add a null variable");
         }
 
+        if (variable.getValue() == null) {
+            return;
+        }
+
         variable.order = this.index;
         this.index++;
         this.variables.add(variable);

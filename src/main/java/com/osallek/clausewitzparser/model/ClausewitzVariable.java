@@ -1,6 +1,6 @@
 package com.osallek.clausewitzparser.model;
 
-import com.osallek.clausewitzparser.common.Utils;
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
     public Integer getAsInt() {
         String var = getValue();
 
-        if (Utils.isNotBlank(var)) {
+        if (ClausewitzUtils.isNotBlank(var)) {
             return Integer.parseInt(var);
         } else {
             return null;
@@ -60,7 +60,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
     public Double getAsDouble() {
         String var = getValue();
 
-        if (Utils.isNotBlank(var)) {
+        if (ClausewitzUtils.isNotBlank(var)) {
             return Double.parseDouble(var);
         } else {
             return null;
@@ -70,7 +70,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
     public Boolean getAsBool() {
         String var = getValue();
 
-        if (Utils.isNotBlank(var)) {
+        if (ClausewitzUtils.isNotBlank(var)) {
             return "yes".equals(var);
         } else {
             return null;
@@ -80,9 +80,9 @@ public final class ClausewitzVariable extends ClausewitzObject {
     public Date getAsDate() {
         String var = getValue();
 
-        if (Utils.isNotBlank(var)) {
+        if (ClausewitzUtils.isNotBlank(var)) {
             try {
-                return Utils.stringToDate(var);
+                return ClausewitzUtils.stringToDate(var);
             } catch (ParseException e) {
                 return null;
             }
@@ -108,7 +108,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
     }
 
     public void setValue(Date value) {
-        this.value = Utils.dateToString(value);
+        this.value = ClausewitzUtils.dateToString(value);
     }
 
     @Override

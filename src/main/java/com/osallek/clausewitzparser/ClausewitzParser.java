@@ -1,5 +1,6 @@
-package com.osallek.clausewitzparser.common;
+package com.osallek.clausewitzparser;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzLineType;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
@@ -16,14 +17,14 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class ClausewitzUtil {
+public class ClausewitzParser {
 
-    private ClausewitzUtil() {
+    private ClausewitzParser() {
     }
 
-    private static final Logger LOGGER = Logger.getLogger(ClausewitzUtil.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ClausewitzParser.class.getName());
 
-    public static ClausewitzItem load(File file, int skip) {
+    public static ClausewitzItem parse(File file, int skip) {
         ClausewitzItem root = null;
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), Charset.forName("windows-1252"))) {
@@ -40,7 +41,7 @@ public class ClausewitzUtil {
         return root;
     }
 
-    public static ClausewitzItem load(ZipFile zipFile, String entryName, int skip) {
+    public static ClausewitzItem parse(ZipFile zipFile, String entryName, int skip) {
         ClausewitzItem root = null;
 
         if (zipFile == null) {
@@ -84,7 +85,7 @@ public class ClausewitzUtil {
                 break;
             }
 
-            if (Utils.isNotBlank(currentLine) && '#' != currentLine.trim().charAt(0)) { //No blank line or comment line
+            if (ClausewitzUtils.isNotBlank(currentLine) && '#' != currentLine.trim().charAt(0)) { //No blank line or comment line
                 String trimmed = currentLine.trim();
                 int indexOf;
                 if ('{' != trimmed.charAt(trimmed.length() - 1) && trimmed.indexOf('{') >= 0) {
@@ -108,7 +109,7 @@ public class ClausewitzUtil {
                     currentLine = currentLine.substring(0, trimmed.length() - 1);
                     reader.reset();
                     reader.skip(currentLine.length());
-                } else if (Utils.hasAtLeast(trimmed, '=', 2)) {
+                } else if (ClausewitzUtils.hasAtLeast(trimmed, '=', 2)) {
                     indexOf = currentLine.indexOf(' ', currentLine.indexOf('='));
                     currentLine = currentLine.substring(0, indexOf);
                     reader.reset();
@@ -144,7 +145,7 @@ public class ClausewitzUtil {
                                                                                               .trim());
                 } else {
                     //No distinctive sign, value in a list
-                    if (!Utils.hasQuotes(currentLine) && currentLine.indexOf(' ') >= 0) {
+                    if (!ClausewitzUtils.hasQuotes(currentLine) && currentLine.indexOf(' ') >= 0) {
                         //List on a single line
                         currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(),
                                                                                          true,

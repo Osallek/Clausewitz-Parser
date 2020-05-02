@@ -1,6 +1,6 @@
 package com.osallek.clausewitzparser.model;
 
-import com.osallek.clausewitzparser.common.Utils;
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -42,8 +42,18 @@ public final class ClausewitzList extends ClausewitzObject {
     public Integer getAsInt(int id) {
         String var = get(id);
 
-        if (Utils.isNotBlank(var)) {
+        if (ClausewitzUtils.isNotBlank(var)) {
             return Integer.parseInt(var);
+        } else {
+            return null;
+        }
+    }
+
+    public Long getAsLong(int id) {
+        String var = get(id);
+
+        if (ClausewitzUtils.isNotBlank(var)) {
+            return Long.parseLong(var);
         } else {
             return null;
         }
@@ -52,7 +62,7 @@ public final class ClausewitzList extends ClausewitzObject {
     public Double getAsDouble(int id) {
         String var = get(id);
 
-        if (Utils.isNotBlank(var)) {
+        if (ClausewitzUtils.isNotBlank(var)) {
             return Double.parseDouble(var);
         } else {
             return null;
@@ -62,7 +72,7 @@ public final class ClausewitzList extends ClausewitzObject {
     public Boolean getAsBool(int id) {
         String var = get(id);
 
-        if (Utils.isNotBlank(var)) {
+        if (ClausewitzUtils.isNotBlank(var)) {
             return "yes".equals(var);
         } else {
             return null;
@@ -90,6 +100,15 @@ public final class ClausewitzList extends ClausewitzObject {
         }
     }
 
+    public void removeLast(String value) {
+        for (int i = this.values.size() - 1; i >= 0; i--) {
+            if (this.values.get(i).equalsIgnoreCase(value)) {
+                this.values.remove(i);
+                break;
+            }
+        }
+    }
+
     public void removeAll(String value) {
         this.values.removeIf(s -> s.equalsIgnoreCase(value));
     }
@@ -104,6 +123,10 @@ public final class ClausewitzList extends ClausewitzObject {
 
     public void add(int val) {
         this.values.add(Integer.toString(val));
+    }
+
+    public void add(long val) {
+        this.values.add(Long.toString(val));
     }
 
     public void add(double val) {
@@ -122,12 +145,31 @@ public final class ClausewitzList extends ClausewitzObject {
         set(id, Integer.toString(val));
     }
 
+    public void set(int id, long val) {
+        set(id, Long.toString(val));
+    }
+
     public void set(int id, double val) {
         set(id, Double.toString(val));
     }
 
     public void set(int id, boolean val) {
         set(id, val ? "yes" : "no");
+    }
+
+    public void change(String previous, String newOne) {
+        Integer index = null;
+
+        for (int i = 0; i < this.values.size(); i++) {
+            if (this.values.get(i).equalsIgnoreCase(previous)) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index != null) {
+            set(index, newOne);
+        }
     }
 
     public void addAll(List<String> values) {
