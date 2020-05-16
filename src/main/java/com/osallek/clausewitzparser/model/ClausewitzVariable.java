@@ -23,6 +23,11 @@ public final class ClausewitzVariable extends ClausewitzObject {
         setValue(value);
     }
 
+    public ClausewitzVariable(ClausewitzObject parent, String name, int order, long value) {
+        super(name, parent, order);
+        setValue(value);
+    }
+
     public ClausewitzVariable(ClausewitzObject parent, String name, int order, double value) {
         super(name, parent, order);
         setValue(value);
@@ -52,6 +57,16 @@ public final class ClausewitzVariable extends ClausewitzObject {
 
         if (ClausewitzUtils.isNotBlank(var)) {
             return Integer.parseInt(var);
+        } else {
+            return null;
+        }
+    }
+
+    public Long getAsLong() {
+        String var = getValue();
+
+        if (ClausewitzUtils.isNotBlank(var)) {
+            return Long.parseLong(var);
         } else {
             return null;
         }
@@ -97,6 +112,10 @@ public final class ClausewitzVariable extends ClausewitzObject {
 
     public void setValue(int value) {
         this.value = Integer.toString(value);
+    }
+
+    public void setValue(long value) {
+        this.value = Long.toString(value);
     }
 
     public void setValue(double value) {

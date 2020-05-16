@@ -85,7 +85,12 @@ public class ClausewitzParser {
                 break;
             }
 
-            if (ClausewitzUtils.isNotBlank(currentLine) && '#' != currentLine.trim().charAt(0)) { //No blank line or comment line
+            //No blank line or comment line
+            if (ClausewitzUtils.isNotBlank(currentLine) && '#' != currentLine.trim().charAt(0)) {
+                if (ClausewitzUtils.hasOnlyOne(currentLine, '"')) {
+                    currentLine += '\n' + reader.readLine();
+                }
+
                 String trimmed = currentLine.trim();
                 int indexOf;
                 if ('{' != trimmed.charAt(trimmed.length() - 1) && trimmed.indexOf('{') >= 0) {
@@ -140,18 +145,27 @@ public class ClausewitzParser {
                     return;
                 } else if ((indexOf = currentLine.indexOf('=')) >= 0) {
                     //Variable
-                    ((ClausewitzItem) currentNode).addVariable(currentLine.substring(0, indexOf)
-                                                                          .trim(), currentLine.substring(indexOf + 1)
-                                                                                              .trim());
+                    ((ClausewitzItem) currentNode).addVariable(currentLine.substring(0, indexOf).trim(),
+                                                               currentLine.substring(indexOf + 1).trim());
                 } else {
                     //No distinctive sign, value in a list
                     if (!ClausewitzUtils.hasQuotes(currentLine) && currentLine.indexOf(' ') >= 0) {
                         //List on a single line
-                        currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(),
-                                                                                         true,
-                                                                                         currentLine.split(" "));
 
-                        ((ClausewitzItem) currentNode.getParent()).removeLastChild(currentNode.getName());
+                        ClausewitzItem previousItem = ((ClausewitzItem) currentNode.getParent()).getLastChild(currentNode
+                                                                                                                      .getName());
+
+                        if (previousItem != null) {
+                            currentNode = ((ClausewitzItem) currentNode.getParent()).changeChildToList(previousItem.getOrder(),
+                                                                                                       currentNode.getName(),
+                                                                                                       true,
+                                                                                                       currentLine.split(" "));
+                        } else {
+                            currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(),
+                                                                                             true,
+                                                                                             currentLine.split(" "));
+                        }
+
                         previousLineType = ClausewitzLineType.LIST_SAME_LINE;
                     } else {
                         //Object list, each line is a value
@@ -163,8 +177,17 @@ public class ClausewitzParser {
                             // key={
                             // value
                             // }
-                            currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(), currentLine);
-                            ((ClausewitzItem) currentNode.getParent()).removeLastChild(currentNode.getName());
+
+                            ClausewitzItem previousItem = ((ClausewitzItem) currentNode.getParent()).getLastChild(currentNode
+                                                                                                                          .getName());
+
+                            if (previousItem != null) {
+                                currentNode = ((ClausewitzItem) currentNode.getParent()).changeChildToList(previousItem.getOrder(),
+                                                                                                           currentNode.getName(),
+                                                                                                           currentLine);
+                            } else {
+                                currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(), currentLine);
+                            }
                         }
 
                         previousLineType = ClausewitzLineType.LIST;

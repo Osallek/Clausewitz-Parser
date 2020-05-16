@@ -82,4 +82,19 @@ public final class ClausewitzUtils {
 
         return false;
     }
+
+    public static boolean hasOnlyOne(String s, char c) {
+        int count = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == c) {
+                count++;
+
+                if (count == 2) {
+                    return false;
+                }
+            }
+        }
+
+        return count != 0;
+    }
 }
