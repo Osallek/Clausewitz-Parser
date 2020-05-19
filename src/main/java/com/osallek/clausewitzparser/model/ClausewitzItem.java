@@ -972,6 +972,17 @@ public final class ClausewitzItem extends ClausewitzObject {
         return var == null ? null : var.getAsDate();
     }
 
+    public List<ClausewitzVariable> getVariables(String varName) {
+        List<ClausewitzVariable> list = new ArrayList<>();
+        for (ClausewitzVariable variable : this.variables) {
+            if (variable.getName().equalsIgnoreCase(varName)) {
+                list.add(variable);
+            }
+        }
+
+        return list;
+    }
+
     public List<ClausewitzItem> getChildren() {
         return this.children;
     }
