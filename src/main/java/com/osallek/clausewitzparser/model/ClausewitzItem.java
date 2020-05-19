@@ -19,6 +19,8 @@ public final class ClausewitzItem extends ClausewitzObject {
 
     private final boolean hasEquals;
 
+    private boolean sameLine = false;
+
     public ClausewitzItem() {
         this(null, "root", 0);
     }
@@ -42,6 +44,14 @@ public final class ClausewitzItem extends ClausewitzObject {
         this.lists = other.lists;
         this.index = other.index;
         this.hasEquals = other.hasEquals;
+    }
+
+    public boolean isSameLine() {
+        return sameLine;
+    }
+
+    public void setSameLine(boolean sameLine) {
+        this.sameLine = sameLine;
     }
 
     public void addChild(ClausewitzItem child) {
@@ -107,6 +117,10 @@ public final class ClausewitzItem extends ClausewitzObject {
     }
 
     public void addVariable(ClausewitzVariable variable) {
+        addVariable(variable, false);
+    }
+
+    public void addVariable(ClausewitzVariable variable, boolean increaseOrders) {
         if (variable == null) {
             throw new NullPointerException("Can't add a null variable");
         }
@@ -115,9 +129,24 @@ public final class ClausewitzItem extends ClausewitzObject {
             return;
         }
 
-        variable.order = this.index;
+        if (increaseOrders) {
+            this.getAllOrdered().stream().filter(co -> co.order >= variable.order).forEach(co -> co.order++);
+        } else {
+            variable.order = this.index;
+        }
+
         this.index++;
         this.variables.add(variable);
+    }
+
+    public ClausewitzVariable setVariableName(int index, String name) {
+        ClausewitzVariable var = getVar(index);
+
+        if (var != null) {
+            var.setName(name);
+        }
+
+        return var;
     }
 
     public ClausewitzVariable setVariable(int index, String value) {
@@ -171,10 +200,14 @@ public final class ClausewitzItem extends ClausewitzObject {
     }
 
     public ClausewitzVariable setVariable(int index, Date value) {
+        return setVariable(index, value, false);
+    }
+
+    public ClausewitzVariable setVariable(int index, Date value, boolean quotes) {
         ClausewitzVariable var = getVar(index);
 
         if (var != null) {
-            var.setValue(value);
+            var.setValue(value, quotes);
         }
 
         return var;
@@ -229,12 +262,80 @@ public final class ClausewitzItem extends ClausewitzObject {
     }
 
     public ClausewitzVariable setVariable(String name, Date value) {
+        return setVariable(name, value, false);
+    }
+
+    public ClausewitzVariable setVariable(String name, Date value, boolean quotes) {
+        ClausewitzVariable var = getVar(name);
+
+        if (var != null) {
+            var.setValue(value, quotes);
+        } else {
+            var = addVariable(name, value, quotes);
+        }
+
+        return var;
+    }
+
+    public ClausewitzVariable setVariable(String name, String value, int order) {
         ClausewitzVariable var = getVar(name);
 
         if (var != null) {
             var.setValue(value);
         } else {
-            var = addVariable(name, value);
+            var = addVariable(name, value, order);
+        }
+
+        return var;
+    }
+
+    public ClausewitzVariable setVariable(String name, int value, int order) {
+        ClausewitzVariable var = getVar(name);
+
+        if (var != null) {
+            var.setValue(value);
+        } else {
+            var = addVariable(name, value, order);
+        }
+
+        return var;
+    }
+
+    public ClausewitzVariable setVariable(String name, double value, int order) {
+        ClausewitzVariable var = getVar(name);
+
+        if (var != null) {
+            var.setValue(value);
+        } else {
+            var = addVariable(name, value, order);
+        }
+
+        return var;
+    }
+
+    public ClausewitzVariable setVariable(String name, boolean value, int order) {
+        ClausewitzVariable var = getVar(name);
+
+        if (var != null) {
+            var.setValue(value);
+        } else {
+            var = addVariable(name, value, order);
+        }
+
+        return var;
+    }
+
+    public ClausewitzVariable setVariable(String name, Date value, int order) {
+        return setVariable(name, value, false, order);
+    }
+
+    public ClausewitzVariable setVariable(String name, Date value, boolean quotes, int order) {
+        ClausewitzVariable var = getVar(name);
+
+        if (var != null) {
+            var.setValue(value, quotes);
+        } else {
+            var = addVariable(name, value, quotes, order);
         }
 
         return var;
@@ -271,8 +372,56 @@ public final class ClausewitzItem extends ClausewitzObject {
     }
 
     public ClausewitzVariable addVariable(String name, Date value) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value);
+        return addVariable(name, value, false);
+    }
+
+    public ClausewitzVariable addVariable(String name, Date value, boolean quotes) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value, quotes);
         addVariable(variable);
+        return variable;
+    }
+
+    public ClausewitzVariable addVariable(String name, String value, int order) {
+        return addVariable(name, value, order, true);
+    }
+
+    public ClausewitzVariable addVariable(String name, String value, int order, boolean increaseOrders) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value);
+        addVariable(variable, increaseOrders);
+        return variable;
+    }
+
+    public ClausewitzVariable addVariable(String name, int value, int order) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value);
+        addVariable(variable, true);
+        return variable;
+    }
+
+    public ClausewitzVariable addVariable(String name, long value, int order) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value);
+        addVariable(variable, true);
+        return variable;
+    }
+
+    public ClausewitzVariable addVariable(String name, double value, int order) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value);
+        addVariable(variable, true);
+        return variable;
+    }
+
+    public ClausewitzVariable addVariable(String name, boolean value, int order) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value);
+        addVariable(variable, true);
+        return variable;
+    }
+
+    public ClausewitzVariable addVariable(String name, Date value, int order) {
+        return addVariable(name, value, false, order);
+    }
+
+    public ClausewitzVariable addVariable(String name, Date value, boolean quotes, int order) {
+        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value, quotes);
+        addVariable(variable, true);
         return variable;
     }
 
@@ -515,6 +664,10 @@ public final class ClausewitzItem extends ClausewitzObject {
 
     public int getNbLists() {
         return this.lists.size();
+    }
+
+    public int getNbObjects() {
+        return getNbChildren() + getNbVariables() + getNbLists();
     }
 
     public ClausewitzItem getChild(int index) {
@@ -885,9 +1038,19 @@ public final class ClausewitzItem extends ClausewitzObject {
 
             bufferedWriter.newLine();
 
-            for (ClausewitzObject object : this.getAllOrdered()) {
-                object.write(bufferedWriter, depth + 1);
+            if (this.sameLine) {
+                printTabs(bufferedWriter, depth + 1);
+                for (ClausewitzObject object : this.getAllOrdered()) {
+                    object.write(bufferedWriter, 0);
+                    printSpace(bufferedWriter);
+                }
+
                 bufferedWriter.newLine();
+            } else {
+                for (ClausewitzObject object : this.getAllOrdered()) {
+                    object.write(bufferedWriter, depth + 1);
+                    bufferedWriter.newLine();
+                }
             }
 
             printTabs(bufferedWriter, depth);

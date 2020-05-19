@@ -119,6 +119,7 @@ public class ClausewitzParser {
                     currentLine = currentLine.substring(0, indexOf);
                     reader.reset();
                     reader.skip(currentLine.length());
+                    previousLineType = ClausewitzLineType.SAME_LINE_OBJECT;
                 }
 
                 currentLine = currentLine.trim();
@@ -147,6 +148,10 @@ public class ClausewitzParser {
                     //Variable
                     ((ClausewitzItem) currentNode).addVariable(currentLine.substring(0, indexOf).trim(),
                                                                currentLine.substring(indexOf + 1).trim());
+
+                    if (ClausewitzLineType.SAME_LINE_OBJECT.equals(previousLineType)) {
+                        ((ClausewitzItem) currentNode).setSameLine(true);
+                    }
                 } else {
                     //No distinctive sign, value in a list
                     if (!ClausewitzUtils.hasQuotes(currentLine) && currentLine.indexOf(' ') >= 0) {

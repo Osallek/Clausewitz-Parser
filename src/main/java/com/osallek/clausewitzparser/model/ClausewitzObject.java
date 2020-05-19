@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public abstract class ClausewitzObject {
 
-    protected final String name;
+    protected String name;
 
     protected final ClausewitzObject parent;
 
@@ -29,6 +29,10 @@ public abstract class ClausewitzObject {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public ClausewitzObject getParent() {

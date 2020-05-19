@@ -39,8 +39,12 @@ public final class ClausewitzVariable extends ClausewitzObject {
     }
 
     public ClausewitzVariable(ClausewitzObject parent, String name, int order, Date value) {
+        this(parent, name, order, value, false);
+    }
+
+    public ClausewitzVariable(ClausewitzObject parent, String name, int order, Date value, boolean quotes) {
         super(name, parent, order);
-        setValue(value);
+        setValue(value, quotes);
     }
 
     public ClausewitzVariable(ClausewitzVariable other) {
@@ -56,7 +60,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
         String var = getValue();
 
         if (ClausewitzUtils.isNotBlank(var)) {
-            return Integer.parseInt(var);
+            return Integer.parseInt(ClausewitzUtils.removeQuotes(var));
         } else {
             return null;
         }
@@ -66,7 +70,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
         String var = getValue();
 
         if (ClausewitzUtils.isNotBlank(var)) {
-            return Long.parseLong(var);
+            return Long.parseLong(ClausewitzUtils.removeQuotes(var));
         } else {
             return null;
         }
@@ -76,7 +80,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
         String var = getValue();
 
         if (ClausewitzUtils.isNotBlank(var)) {
-            return Double.parseDouble(var);
+            return Double.parseDouble(ClausewitzUtils.removeQuotes(var));
         } else {
             return null;
         }
@@ -86,7 +90,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
         String var = getValue();
 
         if (ClausewitzUtils.isNotBlank(var)) {
-            return "yes".equals(var);
+            return "yes".equals(ClausewitzUtils.removeQuotes(var));
         } else {
             return null;
         }
@@ -97,7 +101,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
 
         if (ClausewitzUtils.isNotBlank(var)) {
             try {
-                return ClausewitzUtils.stringToDate(var);
+                return ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(var));
             } catch (ParseException e) {
                 return null;
             }
@@ -127,7 +131,15 @@ public final class ClausewitzVariable extends ClausewitzObject {
     }
 
     public void setValue(Date value) {
-        this.value = ClausewitzUtils.dateToString(value);
+        setValue(value, false);
+    }
+
+    public void setValue(Date value, boolean quotes) {
+        if (quotes) {
+            this.value = ClausewitzUtils.addQuotes(ClausewitzUtils.dateToString(value));
+        } else {
+            this.value = ClausewitzUtils.dateToString(value);
+        }
     }
 
     @Override
