@@ -1,5 +1,6 @@
 package com.osallek.clausewitzparser.common;
 
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -8,6 +9,8 @@ import java.util.Date;
 public final class ClausewitzUtils {
     private ClausewitzUtils() {
     }
+
+    public static final Charset CHARSET = Charset.forName("windows-1252");
 
     public static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy.M.d");
 

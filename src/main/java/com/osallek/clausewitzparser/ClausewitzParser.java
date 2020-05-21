@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.logging.Level;
@@ -27,7 +26,7 @@ public class ClausewitzParser {
     public static ClausewitzItem parse(File file, int skip) {
         ClausewitzItem root = null;
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), Charset.forName("windows-1252"))) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), ClausewitzUtils.CHARSET)) {
             for (int i = 1; i <= skip; i++) {
                 reader.readLine();
             }
@@ -55,7 +54,7 @@ public class ClausewitzParser {
             throw new NullPointerException("No entry");
         }
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(zipEntry), "windows-1252"))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(zipEntry), ClausewitzUtils.CHARSET))) {
             for (int i = 1; i <= skip; i++) {
                 reader.readLine();
             }
