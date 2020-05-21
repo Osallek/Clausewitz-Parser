@@ -46,7 +46,7 @@ public abstract class ClausewitzObject {
     public abstract void write(BufferedWriter bufferedWriter, int depth) throws IOException;
 
     protected void printTabs(BufferedWriter bufferedWriter, int depth) throws IOException {
-        bufferedWriter.write("\t".repeat(depth));
+        bufferedWriter.write(new String(new char[depth]).replace('\0', '\t'));
     }
 
     protected void printEqualsOpen(BufferedWriter bufferedWriter) throws IOException {
