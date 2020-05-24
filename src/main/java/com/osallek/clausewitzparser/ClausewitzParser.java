@@ -3,12 +3,14 @@ package com.osallek.clausewitzparser;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzLineType;
+import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.logging.Level;
@@ -24,9 +26,13 @@ public class ClausewitzParser {
     private static final Logger LOGGER = Logger.getLogger(ClausewitzParser.class.getName());
 
     public static ClausewitzItem parse(File file, int skip) {
+        return ClausewitzParser.parse(file, skip, ClausewitzUtils.CHARSET);
+    }
+
+    public static ClausewitzItem parse(File file, int skip, Charset charset) {
         ClausewitzItem root = null;
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), ClausewitzUtils.CHARSET)) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
             for (int i = 1; i <= skip; i++) {
                 reader.readLine();
             }
@@ -121,6 +127,18 @@ public class ClausewitzParser {
                     previousLineType = ClausewitzLineType.SAME_LINE_OBJECT;
                 }
 
+                if ((indexOf = currentLine.indexOf('#')) >= 0) {
+                    if (ClausewitzUtils.hasAtLeast(trimmed, '#', 2)) {
+                        String[] splits = currentLine.split("#");
+                        currentLine = "";
+                        for (int i = 0; i < splits.length; i += 2) {
+                            currentLine += splits[i] + " ";
+                        }
+                    } else {
+                        currentLine = currentLine.substring(0, indexOf);
+                    }
+                }
+
                 currentLine = currentLine.trim();
 
                 if ('{' == currentLine.charAt(currentLine.length() - 1)) {
@@ -156,18 +174,22 @@ public class ClausewitzParser {
                     if (!ClausewitzUtils.hasQuotes(currentLine) && currentLine.indexOf(' ') >= 0) {
                         //List on a single line
 
-                        ClausewitzItem previousItem = ((ClausewitzItem) currentNode.getParent()).getLastChild(currentNode
-                                                                                                                      .getName());
-
-                        if (previousItem != null) {
-                            currentNode = ((ClausewitzItem) currentNode.getParent()).changeChildToList(previousItem.getOrder(),
-                                                                                                       currentNode.getName(),
-                                                                                                       true,
-                                                                                                       currentLine.split(" "));
+                        if (ClausewitzLineType.LIST_SAME_LINE.equals(previousLineType)) {
+                            ((ClausewitzList) currentNode).addAll(currentLine.split("\\s"));
                         } else {
-                            currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(),
-                                                                                             true,
-                                                                                             currentLine.split(" "));
+                            ClausewitzItem previousItem = ((ClausewitzItem) currentNode.getParent()).getLastChild(currentNode
+                                                                                                                          .getName());
+
+                            if (previousItem != null) {
+                                currentNode = ((ClausewitzItem) currentNode.getParent()).changeChildToList(previousItem.getOrder(),
+                                                                                                           currentNode.getName(),
+                                                                                                           true,
+                                                                                                           currentLine.split("\\s"));
+                            } else {
+                                currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(),
+                                                                                                 true,
+                                                                                                 currentLine.split("\\s"));
+                            }
                         }
 
                         previousLineType = ClausewitzLineType.LIST_SAME_LINE;

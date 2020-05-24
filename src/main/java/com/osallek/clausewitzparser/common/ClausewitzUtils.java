@@ -44,10 +44,14 @@ public final class ClausewitzUtils {
     }
 
     public static boolean hasQuotes(String s) {
-        return '"' == s.charAt(0) && '"' == s.charAt(s.length() - 1);
+        return s != null && ('"' == s.charAt(0) && '"' == s.charAt(s.length() - 1));
     }
 
     public static String addQuotes(String s) {
+        if (s == null) {
+            return null;
+        }
+
         if ('"' != s.charAt(0)) {
             s = "\"" + s;
         }
@@ -60,6 +64,10 @@ public final class ClausewitzUtils {
     }
 
     public static String removeQuotes(String s) {
+        if (s == null) {
+            return null;
+        }
+
         if ('"' == s.charAt(0)) {
             s = s.substring(1);
         }

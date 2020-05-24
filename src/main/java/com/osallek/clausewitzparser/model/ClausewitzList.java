@@ -118,7 +118,9 @@ public final class ClausewitzList extends ClausewitzObject {
     }
 
     public void add(String val) {
-        this.values.add(val);
+        if (ClausewitzUtils.isNotBlank(val)) {
+            this.values.add(val);
+        }
     }
 
     public void add(int val) {
@@ -138,7 +140,9 @@ public final class ClausewitzList extends ClausewitzObject {
     }
 
     public void set(int id, String val) {
-        this.values.set(id, val);
+        if (ClausewitzUtils.isNotBlank(val)) {
+            this.values.set(id, val);
+        }
     }
 
     public void set(int id, int val) {
@@ -158,17 +162,19 @@ public final class ClausewitzList extends ClausewitzObject {
     }
 
     public void change(String previous, String newOne) {
-        Integer index = null;
+        if (ClausewitzUtils.isNotBlank(newOne)) {
+            Integer index = null;
 
-        for (int i = 0; i < this.values.size(); i++) {
-            if (this.values.get(i).equalsIgnoreCase(previous)) {
-                index = i;
-                break;
+            for (int i = 0; i < this.values.size(); i++) {
+                if (this.values.get(i).equalsIgnoreCase(previous)) {
+                    index = i;
+                    break;
+                }
             }
-        }
 
-        if (index != null) {
-            set(index, newOne);
+            if (index != null) {
+                set(index, newOne);
+            }
         }
     }
 
