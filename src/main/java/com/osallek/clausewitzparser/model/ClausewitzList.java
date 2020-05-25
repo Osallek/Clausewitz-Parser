@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -119,6 +120,9 @@ public final class ClausewitzList extends ClausewitzObject {
 
     public void add(String val) {
         if (ClausewitzUtils.isNotBlank(val)) {
+            if (val.indexOf(' ') >= 0 && !ClausewitzUtils.hasQuotes(val)) {
+                val = ClausewitzUtils.addQuotes(val);
+            }
             this.values.add(val);
         }
     }
@@ -132,7 +136,7 @@ public final class ClausewitzList extends ClausewitzObject {
     }
 
     public void add(double val) {
-        this.values.add(Double.toString(val));
+        this.values.add(String.format(Locale.ENGLISH, "%.3f", val));
     }
 
     public void add(boolean val) {
@@ -154,7 +158,7 @@ public final class ClausewitzList extends ClausewitzObject {
     }
 
     public void set(int id, double val) {
-        set(id, Double.toString(val));
+        set(id, String.format(Locale.ENGLISH, "%.3f", val));
     }
 
     public void set(int id, boolean val) {
@@ -217,7 +221,7 @@ public final class ClausewitzList extends ClausewitzObject {
     }
 
     public boolean contains(double val) {
-        return this.contains(String.valueOf(val));
+        return this.contains(String.format(Locale.ENGLISH, "%.3f", val));
     }
 
     public boolean contains(boolean val) {
@@ -256,10 +260,10 @@ public final class ClausewitzList extends ClausewitzObject {
             return false;
         }
 
-        final ClausewitzList gl = (ClausewitzList) obj;
+        final ClausewitzList clausewitzList = (ClausewitzList) obj;
 
-        return name.equals(gl.name)
-               && values.equals(gl.values);
+        return name.equals(clausewitzList.name)
+               && values.equals(clausewitzList.values);
     }
 
     @Override
