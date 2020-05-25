@@ -13,8 +13,12 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -92,12 +96,25 @@ public class ClausewitzParser {
 
             //No blank line or comment line
             if (ClausewitzUtils.isNotBlank(currentLine) && '#' != currentLine.trim().charAt(0)) {
+                int indexOf;
+                if ((indexOf = currentLine.indexOf('#')) >= 0) {
+                    if (ClausewitzUtils.hasAtLeast(currentLine, '#', 2)) {
+                        String[] splits = currentLine.split("#");
+                        currentLine = "";
+                        for (int i = 0; i < splits.length; i += 2) {
+                            currentLine += splits[i] + " ";
+                        }
+                    } else {
+                        currentLine = currentLine.substring(0, indexOf);
+                    }
+                }
+
                 if (ClausewitzUtils.hasOnlyOne(currentLine, '"')) {
                     currentLine += '\n' + reader.readLine();
                 }
 
                 String trimmed = currentLine.trim();
-                int indexOf;
+
                 if ('{' != trimmed.charAt(trimmed.length() - 1) && trimmed.indexOf('{') >= 0) {
                     //To prevent object written in a single line ie: key={variable=value}
                     indexOf = currentLine.indexOf('{') + 1; //To keep the char at the end of the line
@@ -120,23 +137,18 @@ public class ClausewitzParser {
                     reader.reset();
                     reader.skip(currentLine.length());
                 } else if (ClausewitzUtils.hasAtLeast(trimmed, '=', 2)) {
-                    indexOf = currentLine.indexOf(' ', currentLine.indexOf('='));
+                    //Get first whitespace index
+                    indexOf = -1;
+                    for (int index = currentLine.indexOf('='); index < currentLine.length(); index++) {
+                        if (Character.isWhitespace(currentLine.charAt(index))) {
+                            indexOf = index;
+                        }
+                    }
+
                     currentLine = currentLine.substring(0, indexOf);
                     reader.reset();
                     reader.skip(currentLine.length());
                     previousLineType = ClausewitzLineType.SAME_LINE_OBJECT;
-                }
-
-                if ((indexOf = currentLine.indexOf('#')) >= 0) {
-                    if (ClausewitzUtils.hasAtLeast(trimmed, '#', 2)) {
-                        String[] splits = currentLine.split("#");
-                        currentLine = "";
-                        for (int i = 0; i < splits.length; i += 2) {
-                            currentLine += splits[i] + " ";
-                        }
-                    } else {
-                        currentLine = currentLine.substring(0, indexOf);
-                    }
                 }
 
                 currentLine = currentLine.trim();
@@ -168,14 +180,18 @@ public class ClausewitzParser {
 
                     if (ClausewitzLineType.SAME_LINE_OBJECT.equals(previousLineType)) {
                         ((ClausewitzItem) currentNode).setSameLine(true);
+                    } else {
+                        previousLineType = ClausewitzLineType.VAR;
                     }
                 } else {
                     //No distinctive sign, value in a list
-                    if (!ClausewitzUtils.hasQuotes(currentLine) && currentLine.indexOf(' ') >= 0) {
+                    if ((!ClausewitzUtils.hasQuotes(currentLine) || ClausewitzUtils.hasAtLeast(currentLine, '"', 3))
+                        && currentLine.indexOf(' ') >= 0) {
                         //List on a single line
 
-                        if (ClausewitzLineType.LIST_SAME_LINE.equals(previousLineType)) {
-                            ((ClausewitzList) currentNode).addAll(currentLine.split("\\s"));
+                        if (ClausewitzLineType.LIST_SAME_LINE.equals(previousLineType)
+                            || ClausewitzLineType.LIST.equals(previousLineType)) {
+                            ((ClausewitzList) currentNode).addAll(splitSameLine(currentLine));
                         } else {
                             ClausewitzItem previousItem = ((ClausewitzItem) currentNode.getParent()).getLastChild(currentNode
                                                                                                                           .getName());
@@ -184,18 +200,19 @@ public class ClausewitzParser {
                                 currentNode = ((ClausewitzItem) currentNode.getParent()).changeChildToList(previousItem.getOrder(),
                                                                                                            currentNode.getName(),
                                                                                                            true,
-                                                                                                           currentLine.split("\\s"));
+                                                                                                           splitSameLine(currentLine));
                             } else {
                                 currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(),
                                                                                                  true,
-                                                                                                 currentLine.split("\\s"));
+                                                                                                 splitSameLine(currentLine));
                             }
                         }
 
                         previousLineType = ClausewitzLineType.LIST_SAME_LINE;
                     } else {
                         //Object list, each line is a value
-                        if (ClausewitzLineType.LIST.equals(previousLineType)) {
+                        if (ClausewitzLineType.LIST_SAME_LINE.equals(previousLineType)
+                            || ClausewitzLineType.LIST.equals(previousLineType)) {
                             //Appending to an existing list
                             currentNode = ((ClausewitzItem) currentNode.getParent()).addToExistingList(currentNode.getName(), currentLine);
                         } else {
@@ -221,5 +238,21 @@ public class ClausewitzParser {
                 }
             }
         }
+    }
+
+    private static String[] splitSameLine(String line) {
+        String regex = "\"([^\"]*)\"|(\\S+)";
+        List<String> strings = new ArrayList<>();
+
+        Matcher m = Pattern.compile(regex).matcher(line);
+        while (m.find()) {
+            if (m.group(1) != null) {
+                strings.add(ClausewitzUtils.addQuotes(m.group(1)));
+            } else {
+                strings.add(m.group(2));
+            }
+        }
+
+        return strings.toArray(new String[0]);
     }
 }
