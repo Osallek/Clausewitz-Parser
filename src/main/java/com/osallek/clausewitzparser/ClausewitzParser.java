@@ -142,6 +142,7 @@ public class ClausewitzParser {
                     for (int index = currentLine.indexOf('='); index < currentLine.length(); index++) {
                         if (Character.isWhitespace(currentLine.charAt(index))) {
                             indexOf = index;
+                            break;
                         }
                     }
 
