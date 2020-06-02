@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 public final class ClausewitzUtils {
     private ClausewitzUtils() {
@@ -13,6 +14,8 @@ public final class ClausewitzUtils {
     public static final Charset CHARSET = Charset.forName("windows-1252");
 
     public static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy.M.d");
+
+    public static final Pattern DATE_PATTERN = Pattern.compile("^\\d{1,4}\\.\\d{1,2}\\.\\d{1,2}$");
 
     /*Copied from Apache commons*/
     public static boolean isBlank(final CharSequence cs) {

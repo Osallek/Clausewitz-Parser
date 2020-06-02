@@ -115,6 +115,11 @@ public class ClausewitzParser {
 
                 String trimmed = currentLine.trim();
 
+                if (trimmed.charAt(trimmed.length() - 1) == '=') {
+                    currentLine += '\n' + reader.readLine();
+                    trimmed = currentLine.trim();
+                }
+
                 if ('{' != trimmed.charAt(trimmed.length() - 1) && trimmed.indexOf('{') >= 0) {
                     //To prevent object written in a single line ie: key={variable=value}
                     indexOf = currentLine.indexOf('{') + 1; //To keep the char at the end of the line

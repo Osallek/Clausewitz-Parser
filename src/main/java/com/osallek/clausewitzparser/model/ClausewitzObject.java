@@ -5,14 +5,14 @@ import java.io.IOException;
 
 public abstract class ClausewitzObject {
 
-    protected String name;
-
     protected final ClausewitzObject parent;
+
+    protected String name;
 
     protected int order;
 
     public ClausewitzObject(String name, ClausewitzObject parent, int order) {
-        this.name = name;
+        this.name = name.intern();
         this.parent = parent;
         this.order = order;
     }

@@ -15,7 +15,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
 
     public ClausewitzVariable(ClausewitzObject parent, String name, int order, String value) {
         super(name, parent, order);
-        this.value = value;
+        setValue(value);
     }
 
     public ClausewitzVariable(ClausewitzObject parent, String name, int order, int value) {
@@ -111,23 +111,23 @@ public final class ClausewitzVariable extends ClausewitzObject {
     }
 
     public void setValue(String value) {
-        this.value = value;
+        this.value = value.intern();
     }
 
     public void setValue(int value) {
-        this.value = Integer.toString(value);
+        setValue(Integer.toString(value));
     }
 
     public void setValue(long value) {
-        this.value = Long.toString(value);
+        setValue(Long.toString(value));
     }
 
     public void setValue(double value) {
-        this.value = String.format(Locale.ENGLISH, "%.3f", value);
+        setValue(String.format(Locale.ENGLISH, "%.3f", value));
     }
 
     public void setValue(boolean value) {
-        this.value = value ? "yes" : "no";
+        setValue(value ? "yes" : "no");
     }
 
     public void setValue(Date value) {
@@ -136,9 +136,9 @@ public final class ClausewitzVariable extends ClausewitzObject {
 
     public void setValue(Date value, boolean quotes) {
         if (quotes) {
-            this.value = ClausewitzUtils.addQuotes(ClausewitzUtils.dateToString(value));
+            setValue(ClausewitzUtils.addQuotes(ClausewitzUtils.dateToString(value)));
         } else {
-            this.value = ClausewitzUtils.dateToString(value);
+            setValue(ClausewitzUtils.dateToString(value));
         }
     }
 
