@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -458,6 +459,12 @@ public final class ClausewitzItem extends ClausewitzObject {
         }
     }
 
+    public void removeVariables(String varName) {
+        if (this.variables != null) {
+            this.variables.removeIf(variable -> variable.getName().equalsIgnoreCase(varName));
+        }
+    }
+
     public void removeVariable(String varName, String value) {
         if (this.variables != null) {
             for (int i = 0; i < this.variables.size(); i++) {
@@ -795,6 +802,20 @@ public final class ClausewitzItem extends ClausewitzObject {
         }
 
         return clausewitzLists;
+    }
+
+    public List<ClausewitzList> getListsNot(String name) {
+        List<ClausewitzList> listList = new ArrayList<>();
+
+        if (this.lists != null) {
+            for (ClausewitzList list : this.lists) {
+                if (!list.getName().equalsIgnoreCase(name)) {
+                    listList.add(list);
+                }
+            }
+        }
+
+        return listList;
     }
 
     public ClausewitzVariable getVar(int index) {
