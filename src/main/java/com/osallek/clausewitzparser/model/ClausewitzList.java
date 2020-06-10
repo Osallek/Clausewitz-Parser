@@ -4,8 +4,9 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -73,6 +74,20 @@ public final class ClausewitzList extends ClausewitzObject {
 
         if (ClausewitzUtils.isNotBlank(var)) {
             return "yes".equals(var);
+        } else {
+            return null;
+        }
+    }
+
+    public Date getAsDate(int id) {
+        String var = get(id);
+
+        if (ClausewitzUtils.isNotBlank(var)) {
+            try {
+                return ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(var));
+            } catch (ParseException e) {
+                return null;
+            }
         } else {
             return null;
         }
@@ -147,6 +162,10 @@ public final class ClausewitzList extends ClausewitzObject {
         add(val ? "yes" : "no");
     }
 
+    public void add(Date date) {
+        add(ClausewitzUtils.dateToString(date));
+    }
+
     public void set(int id, String val) {
         if (ClausewitzUtils.isNotBlank(val)) {
             getInternalValues().set(id, val);
@@ -163,6 +182,10 @@ public final class ClausewitzList extends ClausewitzObject {
 
     public void set(int id, boolean val) {
         set(id, val ? "yes" : "no");
+    }
+
+    public void set(int id, Date val) {
+        set(id, ClausewitzUtils.dateToString(val));
     }
 
     public void change(String previous, String newOne) {
@@ -284,8 +307,13 @@ public final class ClausewitzList extends ClausewitzObject {
     @Override
     public void write(BufferedWriter bufferedWriter, int depth) throws IOException {
         printTabs(bufferedWriter, depth);
-        bufferedWriter.write(this.name);
-        printEqualsOpen(bufferedWriter);
+
+        if (ClausewitzUtils.isNotBlank(this.name)) {
+            bufferedWriter.write(this.name);
+            printEquals(bufferedWriter);
+        }
+
+        printOpen(bufferedWriter);
         bufferedWriter.newLine();
 
         if (this.sameLine) {

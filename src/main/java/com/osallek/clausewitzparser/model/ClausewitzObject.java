@@ -12,7 +12,7 @@ public abstract class ClausewitzObject {
     protected int order;
 
     public ClausewitzObject(String name, ClausewitzObject parent, int order) {
-        this.name = name.intern();
+        this.name = name == null ? null : name.intern();
         this.parent = parent;
         this.order = order;
     }
