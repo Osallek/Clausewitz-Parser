@@ -10,7 +10,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnmappableCharacterException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -43,14 +47,23 @@ public class ClausewitzParser {
 
             root = new ClausewitzItem();
             readObject(root, null, reader);
+        } catch (CharacterCodingException e) {
+            return parse(file, skip,
+                         charset.equals(ClausewitzUtils.CHARSET) ? StandardCharsets.UTF_8 : ClausewitzUtils.CHARSET);
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "An error occurred while trying to read file {0}: {1} !", new Object[] {file.getAbsolutePath(), e.getMessage()});
+            LOGGER.log(Level.SEVERE, String.format("An error occurred while trying to read file %s: %s !", file.getAbsolutePath(), e
+                    .getMessage()), e);
         }
 
         return root;
     }
 
+
     public static ClausewitzItem parse(ZipFile zipFile, String entryName, int skip) {
+        return parse(zipFile, entryName, skip, ClausewitzUtils.CHARSET);
+    }
+
+    public static ClausewitzItem parse(ZipFile zipFile, String entryName, int skip, Charset charset) {
         ClausewitzItem root = null;
 
         if (zipFile == null) {
@@ -64,7 +77,7 @@ public class ClausewitzParser {
             throw new NullPointerException("No entry");
         }
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(zipEntry), ClausewitzUtils.CHARSET))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(zipEntry), charset))) {
             for (int i = 1; i <= skip; i++) {
                 reader.readLine();
             }
@@ -97,6 +110,7 @@ public class ClausewitzParser {
             //No blank line or comment line
             if (ClausewitzUtils.isNotBlank(currentLine) && '#' != currentLine.trim().charAt(0)) {
                 int indexOf;
+                int trimmedIndexOf;
                 if ((indexOf = currentLine.indexOf('#')) >= 0) {
                     if (ClausewitzUtils.hasAtLeast(currentLine, '#', 2)) {
                         String[] splits = currentLine.split("#");
@@ -120,21 +134,23 @@ public class ClausewitzParser {
                     trimmed = currentLine.trim();
                 }
 
-                if ('{' != trimmed.charAt(trimmed.length() - 1) && trimmed.indexOf('{') >= 0) {
+                if (('{' != trimmed.charAt(trimmed.length() - 1) && (trimmedIndexOf = trimmed.indexOf('{')) >= 0)
+                    || ClausewitzUtils.hasAtLeast(trimmed, '{', 2)) {
                     //To prevent object written in a single line ie: key={variable=value}
                     indexOf = currentLine.indexOf('{') + 1; //To keep the char at the end of the line
                     currentLine = currentLine.substring(0, indexOf);
                     reader.reset();
                     reader.skip(currentLine.length());
-                } else if (!"}".equals(trimmed) && trimmed.indexOf('}') >= 0) {
+                } else if (!"}".equals(trimmed) && (trimmedIndexOf = trimmed.indexOf('}')) >= 0) {
                     indexOf = currentLine.indexOf('}');
-                    if (indexOf == 0) { //Prevent empty line when char it at pos 0
-                        indexOf = 1;
+                    if (trimmedIndexOf == 0) { //Prevent empty line when char it at pos 0
+                        trimmedIndexOf = 1;
+                        indexOf += 1;
                     }
 
-                    currentLine = currentLine.substring(0, indexOf);
+                    currentLine = trimmed.substring(0, trimmedIndexOf);
                     reader.reset();
-                    reader.skip(currentLine.length());
+                    reader.skip(indexOf);
                 } else if (trimmed.length() > 1 && '{' == trimmed.charAt(trimmed.length() - 1) &&
                            '{' == trimmed.charAt(trimmed.length() - 2)) {
                     //To prevent line finishing with {{ (no '=' ie: eu4 save map_are_data
