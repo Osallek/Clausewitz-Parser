@@ -12,7 +12,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public final class ClausewitzList extends ClausewitzObject {
+public final class ClausewitzList extends ClausewitzParentedObject {
 
     private List<String> values;
 
@@ -23,7 +23,7 @@ public final class ClausewitzList extends ClausewitzObject {
     }
 
     ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine) {
-        super(name, parent, order);
+        super(name, order, parent);
         this.sameLine = sameLine;
     }
 
@@ -306,32 +306,34 @@ public final class ClausewitzList extends ClausewitzObject {
 
     @Override
     public void write(BufferedWriter bufferedWriter, int depth) throws IOException {
-        printTabs(bufferedWriter, depth);
+        ClausewitzUtils.printTabs(bufferedWriter, depth);
 
         if (ClausewitzUtils.isNotBlank(this.name)) {
             bufferedWriter.write(this.name);
-            printEquals(bufferedWriter);
+            ClausewitzUtils.printEquals(bufferedWriter);
         }
 
-        printOpen(bufferedWriter);
+        ClausewitzUtils.printOpen(bufferedWriter);
         bufferedWriter.newLine();
 
         if (this.sameLine) {
-            printTabs(bufferedWriter, depth + 1);
+            ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
+
             for (String str : getInternalValues()) {
                 bufferedWriter.write(str);
-                printSpace(bufferedWriter);
+                ClausewitzUtils.printSpace(bufferedWriter);
             }
+
             bufferedWriter.newLine();
         } else {
             for (String str : getInternalValues()) {
-                printTabs(bufferedWriter, depth + 1);
+                ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
                 bufferedWriter.write(str);
                 bufferedWriter.newLine();
             }
         }
 
-        printTabs(bufferedWriter, depth);
-        printClose(bufferedWriter);
+        ClausewitzUtils.printTabs(bufferedWriter, depth);
+        ClausewitzUtils.printClose(bufferedWriter);
     }
 }

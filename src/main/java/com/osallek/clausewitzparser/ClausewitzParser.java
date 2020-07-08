@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzLineType;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
+import com.osallek.clausewitzparser.model.ClausewitzParentedObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,9 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
-import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
-import java.nio.charset.UnmappableCharacterException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -48,11 +47,14 @@ public class ClausewitzParser {
             root = new ClausewitzItem();
             readObject(root, null, reader);
         } catch (CharacterCodingException e) {
-            return parse(file, skip,
+            return parse(file,
+                         skip,
                          charset.equals(ClausewitzUtils.CHARSET) ? StandardCharsets.UTF_8 : ClausewitzUtils.CHARSET);
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, String.format("An error occurred while trying to read file %s: %s !", file.getAbsolutePath(), e
-                    .getMessage()), e);
+            LOGGER.log(Level.SEVERE, String.format("An error occurred while trying to read file %s: %s !",
+                                                   file.getAbsolutePath(),
+                                                   e.getMessage()),
+                       e);
         }
 
         return root;
@@ -85,8 +87,11 @@ public class ClausewitzParser {
             root = new ClausewitzItem();
             readObject(root, null, reader);
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, MessageFormat.format("An error occurred while trying to read entry {0} from file {1}: {2} !", zipEntry
-                    .getName(), zipFile.getName(), e.getMessage()), e);
+            LOGGER.log(Level.SEVERE, MessageFormat.format("An error occurred while trying to read entry {0} from file {1}: {2} !",
+                                                          zipEntry.getName(),
+                                                          zipFile.getName(),
+                                                          e.getMessage()),
+                       e);
         }
 
         return root;
@@ -215,16 +220,16 @@ public class ClausewitzParser {
                             || ClausewitzLineType.LIST.equals(previousLineType)) {
                             ((ClausewitzList) currentNode).addAll(splitSameLine(currentLine));
                         } else {
-                            ClausewitzItem previousItem = ((ClausewitzItem) currentNode.getParent()).getLastChild(currentNode
+                            ClausewitzItem previousItem = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).getLastChild(currentNode
                                                                                                                           .getName());
 
                             if (previousItem != null) {
-                                currentNode = ((ClausewitzItem) currentNode.getParent()).changeChildToList(previousItem.getOrder(),
+                                currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).changeChildToList(previousItem.getOrder(),
                                                                                                            currentNode.getName(),
                                                                                                            true,
                                                                                                            splitSameLine(currentLine));
                             } else {
-                                currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(),
+                                currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).addList(currentNode.getName(),
                                                                                                  true,
                                                                                                  splitSameLine(currentLine));
                             }
@@ -236,22 +241,22 @@ public class ClausewitzParser {
                         if (ClausewitzLineType.LIST_SAME_LINE.equals(previousLineType)
                             || ClausewitzLineType.LIST.equals(previousLineType)) {
                             //Appending to an existing list
-                            currentNode = ((ClausewitzItem) currentNode.getParent()).addToExistingList(currentNode.getName(), currentLine);
+                            currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).addToExistingList(currentNode.getName(), currentLine);
                         } else {
                             //Create a new list in the parent, then delete the current node previously detected and added as an object ie:
                             // key={
                             // value
                             // }
 
-                            ClausewitzItem previousItem = ((ClausewitzItem) currentNode.getParent()).getLastChild(currentNode
+                            ClausewitzItem previousItem = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).getLastChild(currentNode
                                                                                                                           .getName());
 
                             if (previousItem != null) {
-                                currentNode = ((ClausewitzItem) currentNode.getParent()).changeChildToList(previousItem.getOrder(),
+                                currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).changeChildToList(previousItem.getOrder(),
                                                                                                            currentNode.getName(),
                                                                                                            currentLine);
                             } else {
-                                currentNode = ((ClausewitzItem) currentNode.getParent()).addList(currentNode.getName(), currentLine);
+                                currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).addList(currentNode.getName(), currentLine);
                             }
                         }
 

@@ -13,37 +13,37 @@ public final class ClausewitzVariable extends ClausewitzObject {
 
     private String value;
 
-    public ClausewitzVariable(ClausewitzObject parent, String name, int order, String value) {
-        super(name, parent, order);
+    public ClausewitzVariable(String name, int order, String value) {
+        super(name, order);
         setValue(value);
     }
 
-    public ClausewitzVariable(ClausewitzObject parent, String name, int order, int value) {
-        super(name, parent, order);
+    public ClausewitzVariable(String name, int order, int value) {
+        super(name, order);
         setValue(value);
     }
 
-    public ClausewitzVariable(ClausewitzObject parent, String name, int order, long value) {
-        super(name, parent, order);
+    public ClausewitzVariable(String name, int order, long value) {
+        super(name, order);
         setValue(value);
     }
 
-    public ClausewitzVariable(ClausewitzObject parent, String name, int order, double value) {
-        super(name, parent, order);
+    public ClausewitzVariable(String name, int order, double value) {
+        super(name, order);
         setValue(value);
     }
 
-    public ClausewitzVariable(ClausewitzObject parent, String name, int order, boolean value) {
-        super(name, parent, order);
+    public ClausewitzVariable(String name, int order, boolean value) {
+        super(name, order);
         setValue(value);
     }
 
-    public ClausewitzVariable(ClausewitzObject parent, String name, int order, Date value) {
-        this(parent, name, order, value, false);
+    public ClausewitzVariable(String name, int order, Date value) {
+        this(name, order, value, false);
     }
 
-    public ClausewitzVariable(ClausewitzObject parent, String name, int order, Date value, boolean quotes) {
-        super(name, parent, order);
+    public ClausewitzVariable(String name, int order, Date value, boolean quotes) {
+        super(name, order);
         setValue(value, quotes);
     }
 
@@ -162,9 +162,9 @@ public final class ClausewitzVariable extends ClausewitzObject {
 
     @Override
     public void write(BufferedWriter bufferedWriter, int depth) throws IOException {
-        printTabs(bufferedWriter, depth);
+        ClausewitzUtils.printTabs(bufferedWriter, depth);
         bufferedWriter.write(this.name);
-        printEquals(bufferedWriter);
+        ClausewitzUtils.printEquals(bufferedWriter);
         bufferedWriter.write(this.value);
     }
 }

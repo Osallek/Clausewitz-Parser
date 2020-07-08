@@ -8,11 +8,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class ClausewitzItem extends ClausewitzObject {
+public final class ClausewitzItem extends ClausewitzParentedObject {
 
     private List<ClausewitzItem> children;
 
@@ -35,7 +34,7 @@ public final class ClausewitzItem extends ClausewitzObject {
     }
 
     public ClausewitzItem(ClausewitzItem parent, String name, int order, boolean hasEquals) {
-        super(name, parent, order);
+        super(name, order, parent);
         this.hasEquals = hasEquals;
     }
 
@@ -355,25 +354,25 @@ public final class ClausewitzItem extends ClausewitzObject {
     }
 
     public ClausewitzVariable addVariable(String name, String value) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, this.index, value);
         addVariable(variable);
         return variable;
     }
 
     public ClausewitzVariable addVariable(String name, int value) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, this.index, value);
         addVariable(variable);
         return variable;
     }
 
     public ClausewitzVariable addVariable(String name, double value) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, this.index, value);
         addVariable(variable);
         return variable;
     }
 
     public ClausewitzVariable addVariable(String name, boolean value) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, this.index, value);
         addVariable(variable);
         return variable;
     }
@@ -383,7 +382,7 @@ public final class ClausewitzItem extends ClausewitzObject {
     }
 
     public ClausewitzVariable addVariable(String name, Date value, boolean quotes) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, this.index, value, quotes);
+        ClausewitzVariable variable = new ClausewitzVariable(name, this.index, value, quotes);
         addVariable(variable);
         return variable;
     }
@@ -393,25 +392,25 @@ public final class ClausewitzItem extends ClausewitzObject {
     }
 
     public ClausewitzVariable addVariable(String name, String value, int order, boolean increaseOrders) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, order, value);
         addVariable(variable, increaseOrders);
         return variable;
     }
 
     public ClausewitzVariable addVariable(String name, int value, int order) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, order, value);
         addVariable(variable, true);
         return variable;
     }
 
     public ClausewitzVariable addVariable(String name, double value, int order) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, order, value);
         addVariable(variable, true);
         return variable;
     }
 
     public ClausewitzVariable addVariable(String name, boolean value, int order) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, order, value);
         addVariable(variable, true);
         return variable;
     }
@@ -421,7 +420,7 @@ public final class ClausewitzItem extends ClausewitzObject {
     }
 
     public ClausewitzVariable addVariable(String name, Date value, boolean quotes, int order) {
-        ClausewitzVariable variable = new ClausewitzVariable(this, name, order, value, quotes);
+        ClausewitzVariable variable = new ClausewitzVariable(name, order, value, quotes);
         addVariable(variable, true);
         return variable;
     }
@@ -1158,21 +1157,23 @@ public final class ClausewitzItem extends ClausewitzObject {
     @Override
     public void write(BufferedWriter bufferedWriter, int depth) throws IOException {
         if (!"root".equals(getName())) {
-            printTabs(bufferedWriter, depth);
+            ClausewitzUtils.printTabs(bufferedWriter, depth);
             bufferedWriter.write(this.name);
+
             if (!this.hasEquals) {
-                printOpen(bufferedWriter);
+                ClausewitzUtils.printOpen(bufferedWriter);
             } else {
-                printEqualsOpen(bufferedWriter);
+                ClausewitzUtils.printEqualsOpen(bufferedWriter);
             }
 
             bufferedWriter.newLine();
 
             if (this.sameLine) {
-                printTabs(bufferedWriter, depth + 1);
+                ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
+
                 for (ClausewitzObject object : this.getAllOrdered()) {
                     object.write(bufferedWriter, 0);
-                    printSpace(bufferedWriter);
+                    ClausewitzUtils.printSpace(bufferedWriter);
                 }
 
                 bufferedWriter.newLine();
@@ -1183,8 +1184,8 @@ public final class ClausewitzItem extends ClausewitzObject {
                 }
             }
 
-            printTabs(bufferedWriter, depth);
-            printClose(bufferedWriter);
+            ClausewitzUtils.printTabs(bufferedWriter, depth);
+            ClausewitzUtils.printClose(bufferedWriter);
         } else {
             List<ClausewitzObject> objects = this.getAllOrdered();
 

@@ -1,5 +1,7 @@
 package com.osallek.clausewitzparser.common;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -110,5 +112,30 @@ public final class ClausewitzUtils {
         }
 
         return count != 0;
+    }
+
+    public static void printTabs(BufferedWriter bufferedWriter, int depth) throws IOException {
+        bufferedWriter.write(new String(new char[depth]).replace('\0', '\t'));
+    }
+
+    public static void printEqualsOpen(BufferedWriter bufferedWriter) throws IOException {
+        printEquals(bufferedWriter);
+        printOpen(bufferedWriter);
+    }
+
+    public static void printEquals(BufferedWriter bufferedWriter) throws IOException {
+        bufferedWriter.write("=");
+    }
+
+    public static void printOpen(BufferedWriter bufferedWriter) throws IOException {
+        bufferedWriter.write("{");
+    }
+
+    public static void printClose(BufferedWriter bufferedWriter) throws IOException {
+        bufferedWriter.write("}");
+    }
+
+    public static void printSpace(BufferedWriter bufferedWriter) throws IOException {
+        bufferedWriter.write(" ");
     }
 }
