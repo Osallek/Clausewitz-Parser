@@ -19,8 +19,6 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
 
     private List<ClausewitzList> lists;
 
-    private int index;
-
     private final boolean hasEquals;
 
     private boolean sameLine = false;
@@ -75,19 +73,18 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
             throw new NullPointerException("Can't add a null child");
         }
 
-        child.order = this.index;
-        this.index++;
+        child.order = getNbObjects();
         getInternalChildren().add(child);
     }
 
     public ClausewitzItem addChild(String name) {
-        ClausewitzItem child = new ClausewitzItem(this, name, this.index);
+        ClausewitzItem child = new ClausewitzItem(this, name, getNbObjects());
         addChild(child);
         return child;
     }
 
     public ClausewitzItem addChild(String name, boolean hasEquals) {
-        ClausewitzItem child = new ClausewitzItem(this, name, this.index, hasEquals);
+        ClausewitzItem child = new ClausewitzItem(this, name, getNbObjects(), hasEquals);
         addChild(child);
         return child;
     }
@@ -154,10 +151,9 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         if (increaseOrders) {
             this.getAllOrdered().stream().filter(co -> co.order >= variable.order).forEach(co -> co.order++);
         } else {
-            variable.order = this.index;
+            variable.order = getNbObjects();
         }
 
-        this.index++;
         getInternalVariables().add(variable);
     }
 
@@ -354,25 +350,25 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzVariable addVariable(String name, String value) {
-        ClausewitzVariable variable = new ClausewitzVariable(name, this.index, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, getNbObjects(), value);
         addVariable(variable);
         return variable;
     }
 
     public ClausewitzVariable addVariable(String name, int value) {
-        ClausewitzVariable variable = new ClausewitzVariable(name, this.index, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, getNbObjects(), value);
         addVariable(variable);
         return variable;
     }
 
     public ClausewitzVariable addVariable(String name, double value) {
-        ClausewitzVariable variable = new ClausewitzVariable(name, this.index, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, getNbObjects(), value);
         addVariable(variable);
         return variable;
     }
 
     public ClausewitzVariable addVariable(String name, boolean value) {
-        ClausewitzVariable variable = new ClausewitzVariable(name, this.index, value);
+        ClausewitzVariable variable = new ClausewitzVariable(name, getNbObjects(), value);
         addVariable(variable);
         return variable;
     }
@@ -382,7 +378,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzVariable addVariable(String name, Date value, boolean quotes) {
-        ClausewitzVariable variable = new ClausewitzVariable(name, this.index, value, quotes);
+        ClausewitzVariable variable = new ClausewitzVariable(name, getNbObjects(), value, quotes);
         addVariable(variable);
         return variable;
     }
@@ -506,8 +502,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzList addList(ClausewitzList list) {
-        list.order = this.index;
-        this.index++;
+        list.order = getNbObjects();
         getInternalLists().add(list);
 
         return list;
@@ -517,7 +512,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         ClausewitzList list = getList(name);
 
         if (list == null) {
-            list = new ClausewitzList(this, name, this.index);
+            list = new ClausewitzList(this, name, getNbObjects());
             list.add(value);
             addList(list);
         } else {
@@ -531,7 +526,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         ClausewitzList list = getList(name);
 
         if (list == null) {
-            list = new ClausewitzList(this, name, this.index, sameLine);
+            list = new ClausewitzList(this, name, getNbObjects(), sameLine);
             list.addAll(values);
             addList(list);
         } else {
@@ -545,7 +540,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         ClausewitzList list = getList(name);
 
         if (list == null) {
-            list = new ClausewitzList(this, name, this.index);
+            list = new ClausewitzList(this, name, getNbObjects());
             list.addAll(values);
             addList(list);
         } else {
@@ -556,7 +551,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzList addList(String name, String value) {
-        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.add(value);
         addList(list);
 
@@ -564,7 +559,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzList addList(String name, Integer value) {
-        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.add(value);
         addList(list);
 
@@ -572,7 +567,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzList addList(String name, String... values) {
-        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.addAll(values);
         addList(list);
 
@@ -580,7 +575,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzList addList(String name, boolean sameLine, String... values) {
-        ClausewitzList list = new ClausewitzList(this, name, this.index, sameLine);
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects(), sameLine);
         list.addAll(values);
         addList(list);
 
@@ -588,7 +583,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzList addList(String name, List<String> values) {
-        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.addAll(values);
         addList(list);
 
@@ -596,7 +591,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzList addList(String name, Integer... values) {
-        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.addAll(values);
         addList(list);
 
@@ -604,7 +599,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzList addList(String name, Double... values) {
-        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.addAll(values);
         addList(list);
 
@@ -612,7 +607,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     public ClausewitzList addList(String name, Boolean... values) {
-        ClausewitzList list = new ClausewitzList(this, name, this.index);
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.addAll(values);
         addList(list);
 
@@ -1149,7 +1144,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     public List<ClausewitzVariable> getBlankNameVariable() {
         List<ClausewitzVariable> listList = new ArrayList<>();
         listList.addAll(this.getVariables().stream().filter(var -> ClausewitzUtils.isBlank(var.getName())).collect(Collectors.toList()));
-        listList.addAll(this.getChildren().stream().map(ClausewitzItem::getBlankVariable).flatMap(Collection::stream).collect(Collectors.toList()));
+        listList.addAll(this.getChildren().stream().map(ClausewitzItem::getBlankNameVariable).flatMap(Collection::stream).collect(Collectors.toList()));
 
         return listList;
     }
