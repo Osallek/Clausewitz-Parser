@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class ClausewitzItem extends ClausewitzParentedObject {
@@ -135,6 +136,10 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         }
     }
 
+    public void removeChildIf(Predicate<ClausewitzItem> filter) {
+        this.children.removeIf(filter);
+    }
+
     public void addVariable(ClausewitzVariable variable) {
         addVariable(variable, false);
     }
@@ -151,6 +156,10 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         }
 
         getInternalVariables().add(variable);
+    }
+
+    public void removeVariableIf(Predicate<ClausewitzVariable> filter) {
+        this.variables.removeIf(filter);
     }
 
     public ClausewitzVariable setVariableName(int index, String name) {
@@ -661,6 +670,10 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         }
     }
 
+    public void removeListIf(Predicate<ClausewitzList> filter) {
+        this.lists.removeIf(filter);
+    }
+
     public void removeAll() {
         this.removeAllChildren();
         this.removeAllVariables();
@@ -735,7 +748,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
 
         return null;
     }
-    
+
     public List<ClausewitzItem> getChildren(String name) {
         List<ClausewitzItem> list = new ArrayList<>();
 
