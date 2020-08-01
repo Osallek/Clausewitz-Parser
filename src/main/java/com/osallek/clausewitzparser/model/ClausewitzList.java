@@ -16,21 +16,13 @@ public final class ClausewitzList extends ClausewitzParentedObject {
 
     private List<String> values;
 
-    private final boolean sameLine;
-
     ClausewitzList(ClausewitzItem parent, String name, int order) {
-        this(parent, name, order, false);
-    }
-
-    ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine) {
         super(name, order, parent);
-        this.sameLine = sameLine;
     }
 
     ClausewitzList(ClausewitzList other) {
         super(other);
         this.values = other.values;
-        this.sameLine = other.sameLine;
     }
 
     private List<String> getInternalValues() {
@@ -277,12 +269,14 @@ public final class ClausewitzList extends ClausewitzParentedObject {
         return getValues().stream().map("yes"::equalsIgnoreCase).collect(Collectors.toList());
     }
 
-    public boolean isSameLine() {
-        return this.sameLine;
-    }
-
     public boolean isEmpty() {
         return this.values == null || this.values.isEmpty();
+    }
+
+    @Override
+
+    public String getName() {
+        return super.getName();
     }
 
     @Override
@@ -316,21 +310,10 @@ public final class ClausewitzList extends ClausewitzParentedObject {
         ClausewitzUtils.printOpen(bufferedWriter);
         bufferedWriter.newLine();
 
-        if (this.sameLine) {
+        for (String str : getInternalValues()) {
             ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
-
-            for (String str : getInternalValues()) {
-                bufferedWriter.write(str);
-                ClausewitzUtils.printSpace(bufferedWriter);
-            }
-
+            bufferedWriter.write(str);
             bufferedWriter.newLine();
-        } else {
-            for (String str : getInternalValues()) {
-                ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
-                bufferedWriter.write(str);
-                bufferedWriter.newLine();
-            }
         }
 
         ClausewitzUtils.printTabs(bufferedWriter, depth);

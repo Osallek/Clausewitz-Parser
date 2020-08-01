@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.regex.Pattern;
 
 public final class ClausewitzUtils {
+
     private ClausewitzUtils() {
     }
 
@@ -138,4 +139,5 @@ public final class ClausewitzUtils {
     public static void printSpace(BufferedWriter bufferedWriter) throws IOException {
         bufferedWriter.write(" ");
     }
+
 }

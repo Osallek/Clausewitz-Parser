@@ -9,9 +9,12 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class ClausewitzItem extends ClausewitzParentedObject {
+
+    private static final String DEFAULT_NAME = "clausewitzparser";
 
     private List<ClausewitzItem> children;
 
@@ -19,21 +22,14 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
 
     private List<ClausewitzList> lists;
 
-    private final boolean hasEquals;
-
     private boolean sameLine = false;
 
     public ClausewitzItem() {
-        this(null, "root", 0);
+        this(null, DEFAULT_NAME, 0);
     }
 
     public ClausewitzItem(ClausewitzItem parent, String name, int order) {
-        this(parent, name, order, true);
-    }
-
-    public ClausewitzItem(ClausewitzItem parent, String name, int order, boolean hasEquals) {
         super(name, order, parent);
-        this.hasEquals = hasEquals;
     }
 
     public boolean isSameLine() {
@@ -83,12 +79,6 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         return child;
     }
 
-    public ClausewitzItem addChild(String name, boolean hasEquals) {
-        ClausewitzItem child = new ClausewitzItem(this, name, getNbObjects(), hasEquals);
-        addChild(child);
-        return child;
-    }
-
     public void removeChild(int id) {
         if (this.children != null) {
             this.children.remove(id);
@@ -130,6 +120,12 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
                     break;
                 }
             }
+        }
+    }
+
+    public void removeChildren(String childName) {
+        if (this.children != null) {
+            this.children.removeIf(child -> child.getName().equalsIgnoreCase(childName));
         }
     }
 
@@ -526,7 +522,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         ClausewitzList list = getList(name);
 
         if (list == null) {
-            list = new ClausewitzList(this, name, getNbObjects(), sameLine);
+            list = new ClausewitzList(this, name, getNbObjects());
             list.addAll(values);
             addList(list);
         } else {
@@ -568,14 +564,6 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
 
     public ClausewitzList addList(String name, String... values) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
-        list.addAll(values);
-        addList(list);
-
-        return list;
-    }
-
-    public ClausewitzList addList(String name, boolean sameLine, String... values) {
-        ClausewitzList list = new ClausewitzList(this, name, getNbObjects(), sameLine);
         list.addAll(values);
         addList(list);
 
@@ -632,7 +620,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         return list;
     }
 
-    public ClausewitzList changeChildToList(int childOrder, String listName, boolean sameLine, String... values) {
+    public ClausewitzList changeChildToList(int childOrder, String listName, String... values) {
         if (this.children != null) {
             for (int i = 0; i < this.children.size(); i++) {
                 if (childOrder == this.children.get(i).order) {
@@ -642,7 +630,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
             }
         }
 
-        ClausewitzList list = new ClausewitzList(this, listName, childOrder, sameLine);
+        ClausewitzList list = new ClausewitzList(this, listName, childOrder);
         list.addAll(values);
         getInternalLists().add(list);
         this.lists.sort(Comparator.comparingInt(ClausewitzObject::getOrder));
@@ -743,7 +731,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
 
         return null;
     }
-
+    
     public List<ClausewitzItem> getChildren(String name) {
         List<ClausewitzItem> list = new ArrayList<>();
 
@@ -1150,17 +1138,33 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof ClausewitzItem)) {
+            return false;
+        }
+
+        ClausewitzItem item = (ClausewitzItem) o;
+        return sameLine == item.sameLine &&
+               Objects.equals(children, item.children) &&
+               Objects.equals(variables, item.variables) &&
+               Objects.equals(lists, item.lists);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(children, variables, lists, sameLine);
+    }
+
+    @Override
     public void write(BufferedWriter bufferedWriter, int depth) throws IOException {
-        if (!"root".equals(getName())) {
+        if (!DEFAULT_NAME.equals(getName())) {
             ClausewitzUtils.printTabs(bufferedWriter, depth);
             bufferedWriter.write(this.name);
-
-            if (!this.hasEquals) {
-                ClausewitzUtils.printOpen(bufferedWriter);
-            } else {
-                ClausewitzUtils.printEqualsOpen(bufferedWriter);
-            }
-
+            ClausewitzUtils.printEqualsOpen(bufferedWriter);
             bufferedWriter.newLine();
 
             if (this.sameLine) {

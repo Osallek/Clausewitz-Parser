@@ -187,11 +187,7 @@ public class ClausewitzParser {
                     if ((indexOf = currentLine.indexOf('=')) >= 0) {
                         newChild = ((ClausewitzItem) currentNode).addChild(currentLine.substring(0, indexOf).trim());
                     } else {
-                        newChild = ((ClausewitzItem) currentNode).addChild(currentLine.substring(0,
-                                                                                                 currentLine.length() -
-                                                                                                 1)
-                                                                                      .trim(),
-                                                                           false);
+                        newChild = ((ClausewitzItem) currentNode).addChild(currentLine.substring(0, currentLine.length() - 1).trim());
                     }
 
                     previousLineType = ClausewitzLineType.START_OBJECT;
@@ -221,17 +217,16 @@ public class ClausewitzParser {
                             ((ClausewitzList) currentNode).addAll(splitSameLine(currentLine));
                         } else {
                             ClausewitzItem previousItem = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).getLastChild(currentNode
-                                                                                                                          .getName());
+                                                                                                                                                       .getName());
 
                             if (previousItem != null) {
                                 currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).changeChildToList(previousItem.getOrder(),
-                                                                                                           currentNode.getName(),
-                                                                                                           true,
-                                                                                                           splitSameLine(currentLine));
+                                                                                                                                        currentNode.getName(),
+                                                                                                                                        splitSameLine(
+                                                                                                                                                currentLine));
                             } else {
                                 currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).addList(currentNode.getName(),
-                                                                                                 true,
-                                                                                                 splitSameLine(currentLine));
+                                                                                                                              splitSameLine(currentLine));
                             }
                         }
 
@@ -241,7 +236,8 @@ public class ClausewitzParser {
                         if (ClausewitzLineType.LIST_SAME_LINE.equals(previousLineType)
                             || ClausewitzLineType.LIST.equals(previousLineType)) {
                             //Appending to an existing list
-                            currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).addToExistingList(currentNode.getName(), currentLine);
+                            currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).addToExistingList(currentNode.getName(),
+                                                                                                                                    currentLine);
                         } else {
                             //Create a new list in the parent, then delete the current node previously detected and added as an object ie:
                             // key={
@@ -249,14 +245,15 @@ public class ClausewitzParser {
                             // }
 
                             ClausewitzItem previousItem = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).getLastChild(currentNode
-                                                                                                                          .getName());
+                                                                                                                                                       .getName());
 
                             if (previousItem != null) {
                                 currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).changeChildToList(previousItem.getOrder(),
-                                                                                                           currentNode.getName(),
-                                                                                                           currentLine);
+                                                                                                                                        currentNode.getName(),
+                                                                                                                                        currentLine);
                             } else {
-                                currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).addList(currentNode.getName(), currentLine);
+                                currentNode = ((ClausewitzItem) ((ClausewitzParentedObject) currentNode).getParent()).addList(currentNode.getName(),
+                                                                                                                              currentLine);
                             }
                         }
 
