@@ -703,6 +703,10 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         return null;
     }
 
+    public boolean hasChild(String childName) {
+        return getChild(childName) != null;
+    }
+
     public ClausewitzItem getChild(String childName, int index) {
         if (this.children != null) {
             int j = 0;
@@ -772,6 +776,10 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         return null;
     }
 
+    public boolean hasList(String listName) {
+        return getList(listName) != null;
+    }
+
     public List<ClausewitzList> getLists(String varName) {
         List<ClausewitzList> clausewitzLists = new ArrayList<>();
 
@@ -818,6 +826,10 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         }
 
         return null;
+    }
+
+    public boolean hasVar(String varName) {
+        return getVar(varName) != null;
     }
 
     public ClausewitzVariable getVar(String varName, int index) {
