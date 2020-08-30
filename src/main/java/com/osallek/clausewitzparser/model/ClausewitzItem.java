@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -769,6 +770,20 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         if (this.children != null) {
             for (ClausewitzItem child : this.children) {
                 if (!child.getName().equalsIgnoreCase(name)) {
+                    list.add(child);
+                }
+            }
+        }
+
+        return list;
+    }
+
+    public List<ClausewitzItem> getChildrenNot(String... names) {
+        List<ClausewitzItem> list = new ArrayList<>();
+
+        if (this.children != null) {
+            for (ClausewitzItem child : this.children) {
+                if (Arrays.stream(names).noneMatch(child.getName()::equalsIgnoreCase)) {
                     list.add(child);
                 }
             }
