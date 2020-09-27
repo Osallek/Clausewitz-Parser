@@ -959,12 +959,13 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         return list;
     }
 
-    public List<ClausewitzVariable> getVarsNot(String varName) {
+    public List<ClausewitzVariable> getVarsNot(String... varNames) {
         List<ClausewitzVariable> list = new ArrayList<>();
+        List<String> names = Arrays.stream(varNames).map(String::toLowerCase).collect(Collectors.toList());
 
         if (this.variables != null) {
             for (ClausewitzVariable var : this.variables) {
-                if (!var.getName().equalsIgnoreCase(varName)) {
+                if (!names.contains(var.getName().toLowerCase())) {
                     list.add(new ClausewitzVariable(var));
                 }
             }
