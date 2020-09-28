@@ -321,10 +321,21 @@ public final class ClausewitzList extends ClausewitzPObject {
         ClausewitzUtils.printOpen(bufferedWriter);
         bufferedWriter.newLine();
 
-        for (String str : getInternalValues()) {
+        if (this.sameLine) {
             ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
-            bufferedWriter.write(str);
+
+            for (String str : getInternalValues()) {
+                bufferedWriter.write(str);
+                ClausewitzUtils.printSpace(bufferedWriter);
+            }
+
             bufferedWriter.newLine();
+        } else {
+            for (String str : getInternalValues()) {
+                ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
+                bufferedWriter.write(str);
+                bufferedWriter.newLine();
+            }
         }
 
         ClausewitzUtils.printTabs(bufferedWriter, depth);
