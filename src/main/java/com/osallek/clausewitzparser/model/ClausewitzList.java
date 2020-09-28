@@ -12,17 +12,25 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public final class ClausewitzList extends ClausewitzParentedObject {
+public final class ClausewitzList extends ClausewitzPObject {
 
     private List<String> values;
 
+    private final boolean sameLine;
+
     ClausewitzList(ClausewitzItem parent, String name, int order) {
+        this(parent, name, order, false);
+    }
+
+    ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine) {
         super(name, order, parent);
+        this.sameLine = sameLine;
     }
 
     ClausewitzList(ClausewitzList other) {
         super(other);
         this.values = other.values;
+        this.sameLine = other.sameLine;
     }
 
     private List<String> getInternalValues() {
@@ -269,12 +277,15 @@ public final class ClausewitzList extends ClausewitzParentedObject {
         return getValues().stream().map("yes"::equalsIgnoreCase).collect(Collectors.toList());
     }
 
+    public boolean isSameLine() {
+        return sameLine;
+    }
+
     public boolean isEmpty() {
         return this.values == null || this.values.isEmpty();
     }
 
     @Override
-
     public String getName() {
         return super.getName();
     }

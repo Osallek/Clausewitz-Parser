@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public final class ClausewitzItem extends ClausewitzParentedObject {
+public final class ClausewitzItem extends ClausewitzPObject {
 
     private static final String DEFAULT_NAME = "clausewitzparser";
 
@@ -514,39 +514,23 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         return list;
     }
 
-    public ClausewitzList addToExistingList(String name, String value) {
-        ClausewitzList list = getList(name);
-
-        if (list == null) {
-            list = new ClausewitzList(this, name, getNbObjects());
-            list.add(value);
-            addList(list);
-        } else {
-            list.add(value);
-        }
+    public ClausewitzList addList(String name, boolean sameLine, String... values) {
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects(), sameLine);
+        list.addAll(values);
+        addList(list);
 
         return list;
     }
 
-    public ClausewitzList addToExistingList(String name, String[] values, boolean sameLine) {
-        ClausewitzList list = getList(name);
-
-        if (list == null) {
-            list = new ClausewitzList(this, name, getNbObjects());
-            list.addAll(values);
-            addList(list);
-        } else {
-            list.addAll(values);
-        }
-
-        return list;
+    public ClausewitzList addToExistingList(String name, String... values) {
+        return addToExistingList(name, false, values);
     }
 
-    public ClausewitzList addToExistingList(String name, String[] values) {
+    public ClausewitzList addToExistingList(String name, boolean sameLine, String... values) {
         ClausewitzList list = getList(name);
 
         if (list == null) {
-            list = new ClausewitzList(this, name, getNbObjects());
+            list = new ClausewitzList(this, name, getNbObjects(), sameLine);
             list.addAll(values);
             addList(list);
         } else {
@@ -612,25 +596,11 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
         return list;
     }
 
-    public ClausewitzList changeChildToList(int childIndex, String listName, String value) {
-        if (this.children != null) {
-            for (int i = 0; i < this.children.size(); i++) {
-                if (childIndex == this.children.get(i).order) {
-                    this.children.remove(i);
-                    break;
-                }
-            }
-        }
-
-        ClausewitzList list = new ClausewitzList(this, listName, childIndex);
-        list.add(value);
-        getInternalLists().add(list);
-        this.lists.sort(Comparator.comparingInt(ClausewitzObject::getOrder));
-
-        return list;
+    public ClausewitzList changeChildToList(int childOrder, String listName, String... values) {
+        return changeChildToList(childOrder, listName, false, values);
     }
 
-    public ClausewitzList changeChildToList(int childOrder, String listName, String... values) {
+    public ClausewitzList changeChildToList(int childOrder, String listName, boolean sameLine, String... values) {
         if (this.children != null) {
             for (int i = 0; i < this.children.size(); i++) {
                 if (childOrder == this.children.get(i).order) {
@@ -640,7 +610,7 @@ public final class ClausewitzItem extends ClausewitzParentedObject {
             }
         }
 
-        ClausewitzList list = new ClausewitzList(this, listName, childOrder);
+        ClausewitzList list = new ClausewitzList(this, listName, childOrder, sameLine);
         list.addAll(values);
         getInternalLists().add(list);
         this.lists.sort(Comparator.comparingInt(ClausewitzObject::getOrder));
