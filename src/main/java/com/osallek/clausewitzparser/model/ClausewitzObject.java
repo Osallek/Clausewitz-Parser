@@ -32,4 +32,9 @@ public abstract class ClausewitzObject {
     }
 
     public abstract void write(BufferedWriter bufferedWriter, int depth) throws IOException;
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
