@@ -26,12 +26,19 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     private boolean sameLine = false;
 
+    private final boolean hasEquals;
+
     public ClausewitzItem() {
         this(null, DEFAULT_NAME, 0);
     }
 
     public ClausewitzItem(ClausewitzItem parent, String name, int order) {
+        this(parent, name, order, true);
+    }
+
+    public ClausewitzItem(ClausewitzItem parent, String name, int order, boolean hasEquals) {
         super(name, order, parent);
+        this.hasEquals = hasEquals;
     }
 
     public boolean isSameLine() {
@@ -77,6 +84,12 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public ClausewitzItem addChild(String name) {
         ClausewitzItem child = new ClausewitzItem(this, name, getNbObjects());
+        addChild(child);
+        return child;
+    }
+
+    public ClausewitzItem addChild(String name, boolean hasEquals) {
+        ClausewitzItem child = new ClausewitzItem(this, name, getNbObjects(), hasEquals);
         addChild(child);
         return child;
     }
@@ -1175,7 +1188,13 @@ public final class ClausewitzItem extends ClausewitzPObject {
         if (!DEFAULT_NAME.equals(getName())) {
             ClausewitzUtils.printTabs(bufferedWriter, depth);
             bufferedWriter.write(this.name);
-            ClausewitzUtils.printEqualsOpen(bufferedWriter);
+
+            if (this.hasEquals) {
+                ClausewitzUtils.printEqualsOpen(bufferedWriter);
+            } else {
+                ClausewitzUtils.printOpen(bufferedWriter);
+            }
+
             bufferedWriter.newLine();
 
             if (this.sameLine) {

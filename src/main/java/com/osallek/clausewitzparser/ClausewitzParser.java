@@ -178,7 +178,7 @@ public class ClausewitzParser {
                     if ((indexOf = currentLine.indexOf('=')) >= 0) {
                         newChild = ((ClausewitzItem) currentNode).addChild(currentLine.substring(0, indexOf).trim());
                     } else {
-                        newChild = ((ClausewitzItem) currentNode).addChild(currentLine.substring(0, currentLine.length() - 1).trim());
+                        newChild = ((ClausewitzItem) currentNode).addChild(currentLine.substring(0, currentLine.length() - 1).trim(), false);
                     }
 
                     previousLineType = ClausewitzLineType.START_OBJECT;
