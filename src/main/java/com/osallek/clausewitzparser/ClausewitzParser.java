@@ -223,8 +223,8 @@ public class ClausewitzParser {
                         //Object list, each line is a value
                         if (ClausewitzLineType.LIST_SAME_LINE.equals(previousLineType) || ClausewitzLineType.LIST.equals(previousLineType)) {
                             //Appending to an existing list
-                            currentNode = ((ClausewitzItem) ((ClausewitzPObject) currentNode).getParent()).addToExistingList(currentNode.getName(),
-                                                                                                                             currentLine);
+                            currentNode = ((ClausewitzItem) ((ClausewitzPObject) currentNode).getParent()).addToLastExistingList(currentNode.getName(),
+                                                                                                                                 currentLine);
                         } else {
                             //Create a new list in the parent, then delete the current node previously detected and added as an object ie: key={ value }
                             ClausewitzItem previousItem = ((ClausewitzItem) ((ClausewitzPObject) currentNode).getParent()).getLastChild(currentNode.getName());

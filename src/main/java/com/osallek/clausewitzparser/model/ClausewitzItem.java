@@ -553,6 +553,24 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return list;
     }
 
+    public ClausewitzList addToLastExistingList(String name, String... values) {
+        return addToLastExistingList(name, false, values);
+    }
+
+    public ClausewitzList addToLastExistingList(String name, boolean sameLine, String... values) {
+        ClausewitzList list = getLastList(name);
+
+        if (list == null) {
+            list = new ClausewitzList(this, name, getNbObjects(), sameLine);
+            list.addAll(values);
+            addList(list);
+        } else {
+            list.addAll(values);
+        }
+
+        return list;
+    }
+
     public ClausewitzList addList(String name, String value) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.add(value);
@@ -780,6 +798,18 @@ public final class ClausewitzItem extends ClausewitzPObject {
             for (ClausewitzList list : this.lists) {
                 if (list.getName().equalsIgnoreCase(listName)) {
                     return list;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public ClausewitzList getLastList(String childName) {
+        if (this.lists != null) {
+            for (int i = this.lists.size() - 1; i >= 0; i--) {
+                if (this.lists.get(i).getName().equalsIgnoreCase(childName)) {
+                    return lists.get(i);
                 }
             }
         }
