@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public final class ClausewitzUtils {
@@ -39,6 +40,10 @@ public final class ClausewitzUtils {
 
     public static boolean isNotBlank(final CharSequence cs) {
         return !isBlank(cs);
+    }
+
+    public static String doubleToString(double value) {
+        return String.format(Locale.ENGLISH, "%.3f", value);
     }
 
     public static String dateToString(Date date) {

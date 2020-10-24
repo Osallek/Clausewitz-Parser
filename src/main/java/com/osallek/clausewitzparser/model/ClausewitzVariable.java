@@ -123,7 +123,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
     }
 
     public void setValue(double value) {
-        setValue(String.format(Locale.ENGLISH, "%.3f", value));
+        setValue(ClausewitzUtils.doubleToString(value));
     }
 
     public void setValue(boolean value) {
