@@ -793,6 +793,14 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return list;
     }
 
+    public ClausewitzList getList(int index) {
+        if (index < 0 || this.lists == null || index >= this.lists.size()) {
+            return null;
+        }
+
+        return this.lists.get(index);
+    }
+
     public ClausewitzList getList(String listName) {
         if (this.lists != null) {
             for (ClausewitzList list : this.lists) {
