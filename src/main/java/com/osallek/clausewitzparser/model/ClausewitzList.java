@@ -5,6 +5,8 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -79,13 +81,13 @@ public final class ClausewitzList extends ClausewitzPObject {
         }
     }
 
-    public Date getAsDate(int id) {
+    public LocalDate getAsDate(int id) {
         String var = get(id);
 
         if (ClausewitzUtils.isNotBlank(var)) {
             try {
                 return ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(var));
-            } catch (ParseException e) {
+            } catch (DateTimeException e) {
                 return null;
             }
         } else {
@@ -162,7 +164,7 @@ public final class ClausewitzList extends ClausewitzPObject {
         add(val ? "yes" : "no");
     }
 
-    public void add(Date date) {
+    public void add(LocalDate date) {
         add(ClausewitzUtils.dateToString(date));
     }
 
@@ -184,7 +186,7 @@ public final class ClausewitzList extends ClausewitzPObject {
         set(id, val ? "yes" : "no");
     }
 
-    public void set(int id, Date val) {
+    public void set(int id, LocalDate val) {
         set(id, ClausewitzUtils.dateToString(val));
     }
 

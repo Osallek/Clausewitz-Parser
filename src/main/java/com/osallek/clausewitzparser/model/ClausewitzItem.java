@@ -4,11 +4,11 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -226,11 +226,11 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return var;
     }
 
-    public ClausewitzVariable setVariable(int index, Date value) {
+    public ClausewitzVariable setVariable(int index, LocalDate value) {
         return setVariable(index, value, false);
     }
 
-    public ClausewitzVariable setVariable(int index, Date value, boolean quotes) {
+    public ClausewitzVariable setVariable(int index, LocalDate value, boolean quotes) {
         ClausewitzVariable var = getVar(index);
 
         if (var != null) {
@@ -288,11 +288,11 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return var;
     }
 
-    public ClausewitzVariable setVariable(String name, Date value) {
+    public ClausewitzVariable setVariable(String name, LocalDate value) {
         return setVariable(name, value, false);
     }
 
-    public ClausewitzVariable setVariable(String name, Date value, boolean quotes) {
+    public ClausewitzVariable setVariable(String name, LocalDate value, boolean quotes) {
         ClausewitzVariable var = getVar(name);
 
         if (var != null) {
@@ -352,11 +352,11 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return var;
     }
 
-    public ClausewitzVariable setVariable(String name, Date value, int order) {
+    public ClausewitzVariable setVariable(String name, LocalDate value, int order) {
         return setVariable(name, value, false, order);
     }
 
-    public ClausewitzVariable setVariable(String name, Date value, boolean quotes, int order) {
+    public ClausewitzVariable setVariable(String name, LocalDate value, boolean quotes, int order) {
         ClausewitzVariable var = getVar(name);
 
         if (var != null) {
@@ -392,11 +392,11 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return variable;
     }
 
-    public ClausewitzVariable addVariable(String name, Date value) {
+    public ClausewitzVariable addVariable(String name, LocalDate value) {
         return addVariable(name, value, false);
     }
 
-    public ClausewitzVariable addVariable(String name, Date value, boolean quotes) {
+    public ClausewitzVariable addVariable(String name, LocalDate value, boolean quotes) {
         ClausewitzVariable variable = new ClausewitzVariable(name, getNbObjects(), value, quotes);
         addVariable(variable);
         return variable;
@@ -430,11 +430,11 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return variable;
     }
 
-    public ClausewitzVariable addVariable(String name, Date value, int order) {
+    public ClausewitzVariable addVariable(String name, LocalDate value, int order) {
         return addVariable(name, value, false, order);
     }
 
-    public ClausewitzVariable addVariable(String name, Date value, boolean quotes, int order) {
+    public ClausewitzVariable addVariable(String name, LocalDate value, boolean quotes, int order) {
         ClausewitzVariable variable = new ClausewitzVariable(name, order, value, quotes);
         addVariable(variable, true);
         return variable;
@@ -1055,22 +1055,22 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return var == null ? null : var.getAsBool();
     }
 
-    public Date getVarAsDate(int index) {
+    public LocalDate getVarAsDate(int index) {
         ClausewitzVariable var = getVar(index);
         return var == null ? null : var.getAsDate();
     }
 
-    public Date getVarAsDate(String varName) {
+    public LocalDate getVarAsDate(String varName) {
         ClausewitzVariable var = getVar(varName);
         return var == null ? null : var.getAsDate();
     }
 
-    public Date getVarAsDate(String varName, int index) {
+    public LocalDate getVarAsDate(String varName, int index) {
         ClausewitzVariable var = getVar(varName, index);
         return var == null ? null : var.getAsDate();
     }
 
-    public Date getLastVarAsDate(String varName) {
+    public LocalDate getLastVarAsDate(String varName) {
         ClausewitzVariable var = getLastVar(varName);
         return var == null ? null : var.getAsDate();
     }

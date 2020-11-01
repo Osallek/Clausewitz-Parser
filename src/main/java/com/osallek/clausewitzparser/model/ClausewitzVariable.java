@@ -5,6 +5,8 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
@@ -38,11 +40,11 @@ public final class ClausewitzVariable extends ClausewitzObject {
         setValue(value);
     }
 
-    public ClausewitzVariable(String name, int order, Date value) {
+    public ClausewitzVariable(String name, int order, LocalDate value) {
         this(name, order, value, false);
     }
 
-    public ClausewitzVariable(String name, int order, Date value, boolean quotes) {
+    public ClausewitzVariable(String name, int order, LocalDate value, boolean quotes) {
         super(name, order);
         setValue(value, quotes);
     }
@@ -96,13 +98,13 @@ public final class ClausewitzVariable extends ClausewitzObject {
         }
     }
 
-    public Date getAsDate() {
+    public LocalDate getAsDate() {
         String var = getValue();
 
         if (ClausewitzUtils.isNotBlank(var)) {
             try {
                 return ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(var));
-            } catch (ParseException e) {
+            } catch (DateTimeException e) {
                 return null;
             }
         } else {
@@ -130,11 +132,11 @@ public final class ClausewitzVariable extends ClausewitzObject {
         setValue(value ? "yes" : "no");
     }
 
-    public void setValue(Date value) {
+    public void setValue(LocalDate value) {
         setValue(value, false);
     }
 
-    public void setValue(Date value, boolean quotes) {
+    public void setValue(LocalDate value, boolean quotes) {
         if (quotes) {
             setValue(ClausewitzUtils.addQuotes(ClausewitzUtils.dateToString(value)));
         } else {

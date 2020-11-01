@@ -3,10 +3,8 @@ package com.osallek.clausewitzparser.common;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -17,7 +15,7 @@ public final class ClausewitzUtils {
 
     public static final Charset CHARSET = Charset.forName("windows-1252");
 
-    public static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy.M.d");
+    public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("y.M.d");
 
     public static final Pattern DATE_PATTERN = Pattern.compile("^\\d{1,4}\\.\\d{1,2}\\.\\d{1,2}$");
 
@@ -46,12 +44,12 @@ public final class ClausewitzUtils {
         return String.format(Locale.ENGLISH, "%.3f", value);
     }
 
-    public static String dateToString(Date date) {
-        return DATE_FORMAT.format(date);
+    public static String dateToString(LocalDate date) {
+        return date.format(DATE_FORMAT);
     }
 
-    public static Date stringToDate(String s) throws ParseException {
-        return DATE_FORMAT.parse(s);
+    public static LocalDate stringToDate(String s) {
+        return LocalDate.parse(s, DATE_FORMAT);
     }
 
     public static boolean hasQuotes(String s) {
