@@ -4,11 +4,8 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.DateTimeException;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 
 public final class ClausewitzVariable extends ClausewitzObject {
