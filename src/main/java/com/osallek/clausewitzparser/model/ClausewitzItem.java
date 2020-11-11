@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public final class ClausewitzItem extends ClausewitzPObject {
 
-    private static final String DEFAULT_NAME = "clausewitzparser";
+    public static final String DEFAULT_NAME = "clausewitzparser";
 
     private List<ClausewitzItem> children;
 

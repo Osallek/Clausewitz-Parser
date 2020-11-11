@@ -17,7 +17,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -35,6 +39,10 @@ public class ClausewitzParser {
     }
 
     public static ClausewitzItem parse(File file, int skip, Charset charset) {
+        return parse(file, skip, charset, new HashMap<>());
+    }
+
+    public static ClausewitzItem parse(File file, int skip, Charset charset, Map<Predicate<ClausewitzItem>, Consumer<String>> listeners) {
         ClausewitzItem root = null;
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
@@ -43,7 +51,7 @@ public class ClausewitzParser {
             }
 
             root = new ClausewitzItem();
-            readObject(root, null, reader);
+            readObject(root, null, reader, listeners);
         } catch (CharacterCodingException e) {
             return parse(file,
                          skip,
@@ -57,10 +65,10 @@ public class ClausewitzParser {
 
 
     public static ClausewitzItem parse(ZipFile zipFile, String entryName, int skip) {
-        return parse(zipFile, entryName, skip, ClausewitzUtils.CHARSET);
+        return parse(zipFile, entryName, skip, ClausewitzUtils.CHARSET, new HashMap<>());
     }
 
-    public static ClausewitzItem parse(ZipFile zipFile, String entryName, int skip, Charset charset) {
+    public static ClausewitzItem parse(ZipFile zipFile, String entryName, int skip, Charset charset, Map<Predicate<ClausewitzItem>, Consumer<String>> listeners) {
         ClausewitzItem root = null;
 
         if (zipFile == null) {
@@ -80,7 +88,7 @@ public class ClausewitzParser {
             }
 
             root = new ClausewitzItem();
-            readObject(root, null, reader);
+            readObject(root, null, reader, listeners);
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
         }
@@ -88,7 +96,8 @@ public class ClausewitzParser {
         return root;
     }
 
-    private static void readObject(ClausewitzObject currentNode, ClausewitzLineType previousLineType, BufferedReader reader) throws IOException {
+    private static void readObject(ClausewitzObject currentNode, ClausewitzLineType previousLineType, BufferedReader reader,
+                                   Map<Predicate<ClausewitzItem>, Consumer<String>> listeners) throws IOException {
         if (currentNode == null) {
             throw new NullPointerException("node is null");
         }
@@ -188,7 +197,8 @@ public class ClausewitzParser {
                     }
 
                     previousLineType = ClausewitzLineType.START_OBJECT;
-                    readObject(newChild, previousLineType, reader);
+                    listeners.entrySet().stream().filter(entry -> entry.getKey().test(newChild)).forEach(entry -> entry.getValue().accept(newChild.getName()));
+                    readObject(newChild, previousLineType, reader, listeners);
                 } else if ("}".equals(currentLine)) {
                     //End of object
                     previousLineType = ClausewitzLineType.END_OBJECT;
