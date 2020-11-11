@@ -137,16 +137,6 @@ public class ClausewitzParser {
                     currentLine = currentLine.substring(0, indexOf);
                     reader.reset();
                     reader.skip(currentLine.length());
-                } else if (!"}".equals(trimmed) && (trimmedIndexOf = trimmed.indexOf('}')) >= 0) {
-                    indexOf = currentLine.indexOf('}');
-                    if (trimmedIndexOf == 0) { //Prevent empty line when char it at pos 0
-                        trimmedIndexOf = 1;
-                        indexOf += 1;
-                    }
-
-                    currentLine = trimmed.substring(0, trimmedIndexOf);
-                    reader.reset();
-                    reader.skip(indexOf);
                 } else if (trimmed.length() > 1 && '{' == trimmed.charAt(trimmed.length() - 1) &&
                            '{' == trimmed.charAt(trimmed.length() - 2)) {
                     //To prevent line finishing with {{ (no '=' ie: eu4 save map_are_data
@@ -156,7 +146,13 @@ public class ClausewitzParser {
                 } else if (ClausewitzUtils.hasAtLeast(trimmed, '=', 2)) {
                     //Get first whitespace index
                     indexOf = -1;
-                    for (int index = currentLine.indexOf('='); index < currentLine.length(); index++) {
+
+                    int index = currentLine.indexOf('=') + 1;
+                    while (Character.isWhitespace(currentLine.charAt(index))) {//Pretrim to prevent 'X = X' vs 'X=X'
+                        index++;
+                    }
+
+                    for (; index < currentLine.length(); index++) {
                         if (Character.isWhitespace(currentLine.charAt(index))) {
                             indexOf = index;
                             break;
@@ -167,6 +163,16 @@ public class ClausewitzParser {
                     reader.reset();
                     reader.skip(currentLine.length());
                     previousLineType = ClausewitzLineType.SAME_LINE_OBJECT;
+                } else if (!"}".equals(trimmed) && (trimmedIndexOf = trimmed.indexOf('}')) >= 0) {
+                    indexOf = currentLine.indexOf('}');
+                    if (trimmedIndexOf == 0) { //Prevent empty line when char it at pos 0
+                        trimmedIndexOf = 1;
+                        indexOf += 1;
+                    }
+
+                    currentLine = trimmed.substring(0, trimmedIndexOf);
+                    reader.reset();
+                    reader.skip(indexOf);
                 }
 
                 currentLine = currentLine.trim();
@@ -224,7 +230,7 @@ public class ClausewitzParser {
                         if (ClausewitzLineType.LIST_SAME_LINE.equals(previousLineType) || ClausewitzLineType.LIST.equals(previousLineType)) {
                             //Appending to an existing list
                             currentNode = ((ClausewitzItem) ((ClausewitzPObject) currentNode).getParent()).addToLastExistingList(currentNode.getName(),
-                                                                                                                                 currentLine);
+                                                                                                                                 splitSameLine(currentLine));
                         } else {
                             //Create a new list in the parent, then delete the current node previously detected and added as an object ie: key={ value }
                             ClausewitzItem previousItem = ((ClausewitzItem) ((ClausewitzPObject) currentNode).getParent()).getLastChild(currentNode.getName());
@@ -232,10 +238,10 @@ public class ClausewitzParser {
                             if (previousItem != null) {
                                 currentNode = ((ClausewitzItem) ((ClausewitzPObject) currentNode).getParent()).changeChildToList(previousItem.getOrder(),
                                                                                                                                  currentNode.getName(),
-                                                                                                                                 currentLine);
+                                                                                                                                 splitSameLine(currentLine));
                             } else {
                                 currentNode = ((ClausewitzItem) ((ClausewitzPObject) currentNode).getParent()).addList(currentNode.getName(),
-                                                                                                                       currentLine);
+                                                                                                                       splitSameLine(currentLine));
                             }
                         }
 

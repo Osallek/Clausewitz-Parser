@@ -57,7 +57,7 @@ public final class ClausewitzUtils {
     }
 
     public static String addQuotes(String s) {
-        if (s == null) {
+        if (s == null || s.length() < 1) {
             return null;
         }
 
