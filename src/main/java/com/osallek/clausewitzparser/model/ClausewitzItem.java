@@ -1235,7 +1235,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
             bufferedWriter.newLine();
 
-            if (this.sameLine) {
+            if (this.sameLine && this.getInternalChildren().isEmpty()) {
                 ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
 
                 for (ClausewitzObject object : this.getAllOrdered()) {
