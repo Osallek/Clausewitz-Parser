@@ -6,7 +6,10 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public final class ClausewitzVariable extends ClausewitzObject {
 
@@ -160,7 +163,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
     }
 
     @Override
-    public void write(BufferedWriter bufferedWriter, int depth) throws IOException {
+    public void write(BufferedWriter bufferedWriter, int depth, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         ClausewitzUtils.printTabs(bufferedWriter, depth);
         bufferedWriter.write(this.name);
         ClausewitzUtils.printEquals(bufferedWriter);

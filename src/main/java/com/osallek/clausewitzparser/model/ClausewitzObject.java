@@ -2,6 +2,9 @@ package com.osallek.clausewitzparser.model;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public abstract class ClausewitzObject {
 
@@ -31,7 +34,7 @@ public abstract class ClausewitzObject {
         return order;
     }
 
-    public abstract void write(BufferedWriter bufferedWriter, int depth) throws IOException;
+    public abstract void write(BufferedWriter bufferedWriter, int depth, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException;
 
     @Override
     public String toString() {

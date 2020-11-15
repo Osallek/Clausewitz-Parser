@@ -9,8 +9,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -1222,8 +1225,9 @@ public final class ClausewitzItem extends ClausewitzPObject {
     }
 
     @Override
-    public void write(BufferedWriter bufferedWriter, int depth) throws IOException {
+    public void write(BufferedWriter bufferedWriter, int depth, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (!DEFAULT_NAME.equals(getName())) {
+            listeners.entrySet().stream().filter(entry -> entry.getKey().test(this)).forEach(entry -> entry.getValue().accept(this.getName()));
             ClausewitzUtils.printTabs(bufferedWriter, depth);
             bufferedWriter.write(this.name);
 
@@ -1239,14 +1243,14 @@ public final class ClausewitzItem extends ClausewitzPObject {
                 ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
 
                 for (ClausewitzObject object : this.getAllOrdered()) {
-                    object.write(bufferedWriter, 0);
+                    object.write(bufferedWriter, 0, listeners);
                     ClausewitzUtils.printSpace(bufferedWriter);
                 }
 
                 bufferedWriter.newLine();
             } else {
                 for (ClausewitzObject object : this.getAllOrdered()) {
-                    object.write(bufferedWriter, depth + 1);
+                    object.write(bufferedWriter, depth + 1, listeners);
                     bufferedWriter.newLine();
                 }
             }
@@ -1257,7 +1261,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
             List<ClausewitzObject> objects = this.getAllOrdered();
 
             for (int i = 0; i < objects.size(); i++) {
-                objects.get(i).write(bufferedWriter, depth);
+                objects.get(i).write(bufferedWriter, depth, listeners);
 
                 if (i != objects.size() - 1) {
                     bufferedWriter.newLine();

@@ -9,7 +9,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class ClausewitzList extends ClausewitzPObject {
@@ -310,7 +313,8 @@ public final class ClausewitzList extends ClausewitzPObject {
     }
 
     @Override
-    public void write(BufferedWriter bufferedWriter, int depth) throws IOException {
+    public void write(BufferedWriter bufferedWriter, int depth, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
+        listeners.entrySet().stream().filter(entry -> entry.getKey().test(this)).forEach(entry -> entry.getValue().accept(this.getName()));
         ClausewitzUtils.printTabs(bufferedWriter, depth);
 
         if (ClausewitzUtils.isNotBlank(this.name)) {
