@@ -77,11 +77,20 @@ public final class ClausewitzItem extends ClausewitzPObject {
     }
 
     public void addChild(ClausewitzItem child) {
+        addChild(child, false);
+    }
+
+    public void addChild(ClausewitzItem child, boolean increaseOrders) {
         if (child == null) {
             throw new NullPointerException("Can't add a null child");
         }
 
-        child.order = getNbObjects();
+        if (increaseOrders) {
+            this.getAllOrdered().stream().filter(co -> co.order >= child.order).forEach(co -> co.order++);
+        } else {
+            child.order = getNbObjects();
+        }
+
         getInternalChildren().add(child);
     }
 
