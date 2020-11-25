@@ -104,38 +104,44 @@ public final class ClausewitzList extends ClausewitzPObject {
         return this.values == null ? -1 : this.values.indexOf(val);
     }
 
-    public void remove(int id) {
+    public boolean remove(int id) {
         if (this.values != null) {
-            this.values.remove(id);
+            return this.values.remove(id) != null;
         }
+
+        return false;
     }
 
-    public void remove(String value) {
+    public boolean remove(String value) {
         if (this.values != null) {
             for (int i = 0; i < this.values.size(); i++) {
                 if (this.values.get(i).equalsIgnoreCase(value)) {
-                    this.values.remove(i);
-                    break;
+                    return this.values.remove(i) != null;
                 }
             }
         }
+
+        return false;
     }
 
-    public void removeLast(String value) {
+    public boolean removeLast(String value) {
         if (this.values != null) {
             for (int i = this.values.size() - 1; i >= 0; i--) {
                 if (this.values.get(i).equalsIgnoreCase(value)) {
-                    this.values.remove(i);
-                    break;
+                    return this.values.remove(i) != null;
                 }
             }
         }
+
+        return false;
     }
 
-    public void removeAll(String value) {
+    public boolean removeAll(String value) {
         if (this.values != null) {
-            this.values.removeIf(s -> s.equalsIgnoreCase(value));
+            return this.values.removeIf(s -> s.equalsIgnoreCase(value));
         }
+
+        return false;
     }
 
     public void clear() {
