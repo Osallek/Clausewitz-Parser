@@ -1,11 +1,11 @@
-package com.osallek.clausewitzparser;
+package fr.osallek.clausewitzparser;
 
-import com.osallek.clausewitzparser.common.ClausewitzUtils;
-import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzLineType;
-import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.clausewitzparser.model.ClausewitzObject;
-import com.osallek.clausewitzparser.model.ClausewitzPObject;
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
+import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.clausewitzparser.model.ClausewitzLineType;
+import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzObject;
+import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;

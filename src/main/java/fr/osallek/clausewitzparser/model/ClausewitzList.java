@@ -1,6 +1,6 @@
-package com.osallek.clausewitzparser.model;
+package fr.osallek.clausewitzparser.model;
 
-import com.osallek.clausewitzparser.common.ClausewitzUtils;
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

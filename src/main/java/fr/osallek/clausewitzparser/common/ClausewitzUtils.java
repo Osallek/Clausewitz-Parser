@@ -1,4 +1,4 @@
-package com.osallek.clausewitzparser.common;
+package fr.osallek.clausewitzparser.common;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

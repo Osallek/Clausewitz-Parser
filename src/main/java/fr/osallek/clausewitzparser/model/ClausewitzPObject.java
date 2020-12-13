@@ -1,4 +1,4 @@
-package com.osallek.clausewitzparser.model;
+package fr.osallek.clausewitzparser.model;
 
 public abstract class ClausewitzPObject extends ClausewitzObject {
 
