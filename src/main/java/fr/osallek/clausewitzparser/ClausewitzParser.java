@@ -138,7 +138,10 @@ public class ClausewitzParser {
                             currentLine += splits[i] + " ";
                         }
                     } else {
-                        currentLine = currentLine.substring(0, indexOf);
+                        if (!ClausewitzUtils.hasAtLeast(currentLine.substring(0, indexOf), '"', 1)
+                        && !ClausewitzUtils.hasAtLeast(currentLine.substring(indexOf), '"', 1)) {
+                            currentLine = currentLine.substring(0, indexOf);
+                        }
                     }
                 }
 
@@ -219,6 +222,7 @@ public class ClausewitzParser {
                     return;
                 } else if ((indexOf = currentLine.indexOf('=')) >= 0) {
                     //Variable
+
                     ((ClausewitzItem) currentNode).addVariable(currentLine.substring(0, indexOf).trim(), currentLine.substring(indexOf + 1).trim());
 
                     if (ClausewitzLineType.SAME_LINE_OBJECT.equals(previousLineType)) {
