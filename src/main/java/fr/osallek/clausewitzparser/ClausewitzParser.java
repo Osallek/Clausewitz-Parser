@@ -156,6 +156,18 @@ public class ClausewitzParser {
                     trimmed = currentLine.trim();
                 }
 
+                if (!"}".equals(trimmed) && (trimmedIndexOf = trimmed.indexOf('}')) >= 0) {
+                    indexOf = currentLine.indexOf('}');
+                    if (trimmedIndexOf == 0) { //Prevent empty line when char it at pos 0
+                        indexOf += 1;
+                    }
+
+                    currentLine = currentLine.substring(0, indexOf);
+                    trimmed = currentLine.trim();
+                    reader.reset();
+                    reader.skip(currentLine.length());
+                }
+
                 if (('{' != trimmed.charAt(trimmed.length() - 1) && (trimmedIndexOf = trimmed.indexOf('{')) >= 0)
                     || ClausewitzUtils.hasAtLeast(trimmed, '{', 2)) {
                     //To prevent object written in a single line ie: key={variable=value}
@@ -189,16 +201,6 @@ public class ClausewitzParser {
                     reader.reset();
                     reader.skip(currentLine.length());
                     previousLineType = ClausewitzLineType.SAME_LINE_OBJECT;
-                } else if (!"}".equals(trimmed) && (trimmedIndexOf = trimmed.indexOf('}')) >= 0) {
-                    indexOf = currentLine.indexOf('}');
-                    if (trimmedIndexOf == 0) { //Prevent empty line when char it at pos 0
-                        trimmedIndexOf = 1;
-                        indexOf += 1;
-                    }
-
-                    currentLine = trimmed.substring(0, trimmedIndexOf);
-                    reader.reset();
-                    reader.skip(indexOf);
                 }
 
                 currentLine = currentLine.trim();
