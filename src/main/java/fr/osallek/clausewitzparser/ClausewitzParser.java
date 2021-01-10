@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
@@ -51,7 +52,7 @@ public class ClausewitzParser {
     }
 
     private static ClausewitzItem parse(File file, int skip, Charset charset, Map<Predicate<ClausewitzItem>, Consumer<String>> listeners, int retry) {
-        ClausewitzItem root = null;
+        ClausewitzItem root;
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
             for (int i = 1; i <= skip; i++) {
@@ -59,7 +60,7 @@ public class ClausewitzParser {
             }
 
             root = new ClausewitzItem();
-            readObject(root, null, reader, listeners);
+            readObject(root, null, reader, listeners, false);
         } catch (CharacterCodingException e) {
             if (retry < MAX_RETRY) {
                 return parse(file,
@@ -96,13 +97,14 @@ public class ClausewitzParser {
             throw new NullPointerException("No entry");
         }
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(zipEntry), charset))) {
+        try (InputStream stream = zipFile.getInputStream(zipEntry); InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
+             BufferedReader reader = new BufferedReader(inputStreamReader)) {
             for (int i = 1; i <= skip; i++) {
                 reader.readLine();
             }
 
             root = new ClausewitzItem();
-            readObject(root, null, reader, listeners);
+            readObject(root, null, reader, listeners, false);
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
         }
@@ -110,8 +112,88 @@ public class ClausewitzParser {
         return root;
     }
 
+    public static ClausewitzObject readSingleObject(File file, int skip, Charset charset, String objectName) {
+        if (objectName == null) {
+            throw new NullPointerException("objectName is null");
+        }
+
+        ClausewitzItem root = new ClausewitzItem();
+
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
+            for (int i = 1; i <= skip; i++) {
+                reader.readLine();
+            }
+
+            String currentLine;
+
+            while (true) {
+                reader.mark(10000); //Mark the current char to be able to return here afterward
+                currentLine = reader.readLine();
+
+                if (currentLine == null) {
+                    return null;
+                } else if (objectName.equals(currentLine.trim())) {
+                    reader.reset();
+                    break;
+                }
+            }
+
+            readObject(root, null, reader, new HashMap<>(), true);
+        } catch (IOException e) {
+            LOGGER.error("An error occurred while trying to read file {}: {} !", file.getAbsolutePath(), e.getMessage(), e);
+            throw new ClausewitzParseException(e);
+        }
+
+        return root.getAllOrdered(objectName).isEmpty() ? null : root.getAllOrdered(objectName).get(0);
+    }
+
+    public static ClausewitzObject readSingleObject(ZipFile zipFile, String entryName, int skip, Charset charset, String objectName) {
+        if (objectName == null) {
+            throw new NullPointerException("objectName is null");
+        }
+
+        if (zipFile == null) {
+            throw new NullPointerException("zipFile null");
+        }
+
+        ClausewitzItem root = new ClausewitzItem();
+        ZipEntry zipEntry = zipFile.getEntry(entryName);
+
+        if (zipEntry == null) {
+            LOGGER.error("Can''t find entry {} in file {} !", entryName, zipFile.getName());
+            throw new NullPointerException("No entry");
+        }
+
+        try (InputStream stream = zipFile.getInputStream(zipEntry); InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
+             BufferedReader reader = new BufferedReader(inputStreamReader)) {
+            for (int i = 1; i <= skip; i++) {
+                reader.readLine();
+            }
+
+            String currentLine;
+
+            while (true) {
+                reader.mark(10000); //Mark the current char to be able to return here afterward
+                currentLine = reader.readLine();
+
+                if (currentLine == null) {
+                    return null;
+                } else if (currentLine.trim().startsWith(objectName)) {
+                    reader.reset();
+                    break;
+                }
+            }
+
+            readObject(root, null, reader, new HashMap<>(), true);
+        } catch (IOException e) {
+            LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
+        }
+
+        return root.getAllOrdered(objectName).isEmpty() ? null : root.getAllOrdered(objectName).get(0);
+    }
+
     private static void readObject(ClausewitzObject currentNode, ClausewitzLineType previousLineType, BufferedReader reader,
-                                   Map<Predicate<ClausewitzItem>, Consumer<String>> listeners) throws IOException {
+                                   Map<Predicate<ClausewitzItem>, Consumer<String>> listeners, boolean readOnlyOneObject) throws IOException {
         if (currentNode == null) {
             throw new NullPointerException("node is null");
         }
@@ -217,10 +299,15 @@ public class ClausewitzParser {
 
                     previousLineType = ClausewitzLineType.START_OBJECT;
                     listeners.entrySet().stream().filter(entry -> entry.getKey().test(newChild)).forEach(entry -> entry.getValue().accept(newChild.getName()));
-                    readObject(newChild, previousLineType, reader, listeners);
+                    readObject(newChild, previousLineType, reader, listeners, readOnlyOneObject);
+
+                    if (readOnlyOneObject && (((ClausewitzItem) currentNode).getParent() == null)) { //Is root node and just read one object
+                        break;
+                    }
                 } else if ("}".equals(currentLine)) {
                     //End of object
                     previousLineType = ClausewitzLineType.END_OBJECT;
+
                     return;
                 } else if ((indexOf = currentLine.indexOf('=')) >= 0) {
                     //Variable
