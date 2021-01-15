@@ -1,23 +1,43 @@
 package fr.osallek.clausewitzparser.common;
 
+import com.ibm.icu.text.CharsetDetector;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public final class ClausewitzUtils {
 
     private ClausewitzUtils() {
     }
 
-    public static final Charset CHARSET = Charset.forName("windows-1252");
-
     public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("y.M.d");
 
     public static final Pattern DATE_PATTERN = Pattern.compile("^\\d{1,4}\\.\\d{1,2}\\.\\d{1,2}$");
+
+    public static Charset getCharset(File file) throws IOException {
+        try (FileInputStream fileInputStream = new FileInputStream(file); BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream)) {
+            return Charset.forName(new CharsetDetector().setText(bufferedInputStream).detect().getName());
+        }
+    }
+
+    public static Charset getCharset(ZipFile zipFile, String entryName) throws IOException {
+        ZipEntry zipEntry = zipFile.getEntry(entryName);
+
+        try (InputStream stream = zipFile.getInputStream(zipEntry); BufferedInputStream reader = new BufferedInputStream(stream)) {
+            return Charset.forName(new CharsetDetector().setText(reader).detect().getName());
+        }
+    }
 
     /*Copied from Apache commons*/
     public static boolean isBlank(final CharSequence cs) {
