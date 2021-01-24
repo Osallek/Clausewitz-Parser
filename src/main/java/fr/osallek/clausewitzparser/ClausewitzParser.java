@@ -18,6 +18,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +48,7 @@ public class ClausewitzParser {
 
     public static ClausewitzItem parse(File file, int skip, Map<Predicate<ClausewitzItem>, Consumer<String>> listeners, boolean retryCharset) {
         ClausewitzItem root;
+        Instant start = Instant.now();
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), retryCharset ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8)) {
             for (int i = 1; i <= skip; i++) {
@@ -65,6 +68,10 @@ public class ClausewitzParser {
             throw new ClausewitzParseException(e);
         }
 
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Time to read {}: {}ms !", file.getName(), Duration.between(start, Instant.now()).toMillis());
+        }
+
         return root;
     }
 
@@ -78,6 +85,7 @@ public class ClausewitzParser {
 
     public static ClausewitzItem parse(ZipFile zipFile, String entryName, int skip, Map<Predicate<ClausewitzItem>, Consumer<String>> listeners, boolean retryCharset) {
         ClausewitzItem root = null;
+        Instant start = Instant.now();
 
         if (zipFile == null) {
             throw new NullPointerException("zipFile null");
@@ -107,6 +115,10 @@ public class ClausewitzParser {
             }
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Time to read entry {} of {}: {}ms !", zipEntry, zipFile.getName(), Duration.between(start, Instant.now()).toMillis());
         }
 
         return root;
