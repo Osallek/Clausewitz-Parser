@@ -75,6 +75,14 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return this.lists;
     }
 
+    public void addObject(ClausewitzPObject object) {
+        if (ClausewitzItem.class.equals(object.getClass())) {
+            addChild((ClausewitzItem) object);
+        } else if (ClausewitzList.class.equals(object.getClass())) {
+            addList((ClausewitzList) object);
+        }
+    }
+
     public void addChild(ClausewitzItem child) {
         addChild(child, false);
     }
@@ -674,6 +682,10 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return changeChildToList(childOrder, listName, false, values);
     }
 
+    public ClausewitzList changeChildToList(int childOrder, String listName, Collection<String> values) {
+        return changeChildToList(childOrder, listName, false, values.toArray(new String[0]));
+    }
+
     public ClausewitzList changeChildToList(int childOrder, String listName, boolean sameLine, String... values) {
         if (this.children != null) {
             for (int i = 0; i < this.children.size(); i++) {
@@ -686,7 +698,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
         ClausewitzList list = new ClausewitzList(this, listName, childOrder, sameLine);
         list.addAll(values);
-        getInternalLists().add(list);
         this.lists.sort(Comparator.comparingInt(ClausewitzObject::getOrder));
 
         return list;
@@ -1210,6 +1221,12 @@ public final class ClausewitzItem extends ClausewitzPObject {
         }
 
         return false;
+    }
+
+    public boolean isEmpty() {
+        return (this.variables == null || this.variables.isEmpty())
+               && (this.lists == null || this.lists.isEmpty())
+               && (this.children == null || this.children.isEmpty());
     }
 
     public List<ClausewitzList> getEmptyLists() {

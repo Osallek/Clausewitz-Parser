@@ -6,5 +6,5 @@ module fr.osallek.clausewitzparser {
 
     exports fr.osallek.clausewitzparser.common;
     exports fr.osallek.clausewitzparser.model;
-    exports fr.osallek.clausewitzparser;
+    exports fr.osallek.clausewitzparser.parser;
 }
