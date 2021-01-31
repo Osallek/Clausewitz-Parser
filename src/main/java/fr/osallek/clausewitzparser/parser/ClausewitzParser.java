@@ -45,7 +45,7 @@ public class ClausewitzParser {
         ClausewitzItem root;
         Instant start = Instant.now();
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), retryCharset ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), retryCharset ? StandardCharsets.UTF_8 : StandardCharsets.ISO_8859_1)) {
             root = parse(reader, skip, listeners);
         } catch (CharacterCodingException e) {
             if (!retryCharset) {
@@ -89,7 +89,7 @@ public class ClausewitzParser {
         }
 
         try (InputStream stream = zipFile.getInputStream(zipEntry);
-             InputStreamReader inputStreamReader = new InputStreamReader(stream, retryCharset ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8);
+             InputStreamReader inputStreamReader = new InputStreamReader(stream, retryCharset ? StandardCharsets.UTF_8 : StandardCharsets.ISO_8859_1);
              BufferedReader reader = new BufferedReader(inputStreamReader)) {
             root = parse(reader, skip, listeners);
         } catch (CharacterCodingException e) {
