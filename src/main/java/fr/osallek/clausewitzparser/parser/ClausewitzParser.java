@@ -216,9 +216,14 @@ public class ClausewitzParser {
         int letter;
         List<String> strings = new ArrayList<>();
         boolean isEquals = false;
+        int nbNewLine = 0;
 
         while ((letter = reader.read()) > -1) {
             if (Character.isWhitespace(letter)) {
+                if ('\n' == letter) {
+                    nbNewLine++;
+                }
+
                 continue;
             }
 
@@ -245,7 +250,7 @@ public class ClausewitzParser {
             }
 
             if ('{' == letter) {
-                currentNode = new ClausewitzItem((ClausewitzItem) currentNode, strings.isEmpty() ? "" : strings.get(0), 0);
+                currentNode = new ClausewitzItem((ClausewitzItem) currentNode, strings.isEmpty() ? "" : strings.get(0), 0, isEquals);
                 ClausewitzPObject finalCurrentNode = currentNode;
                 listeners.entrySet()
                          .stream()
@@ -269,10 +274,15 @@ public class ClausewitzParser {
                     ClausewitzItem previousItem = currentNode.getParent().getLastChild(currentNode.getName());
 
                     if (previousItem != null) {
-                        currentNode.getParent().changeChildToList(previousItem.getOrder(), currentNode.getName(), strings);
+                        currentNode = currentNode.getParent().changeChildToList(previousItem.getOrder(), currentNode.getName(), strings.size() > 1 && nbNewLine <= 2, strings);
                     } else {
-                        currentNode.getParent().addList(currentNode.getName(), strings);
+                        currentNode = currentNode.getParent().addList(currentNode.getName(), strings.size() > 1 && nbNewLine <= 2, strings);
                     }
+                }
+
+                if (nbNewLine <= 2 && ClausewitzItem.class.equals(currentNode.getClass()) && ((ClausewitzItem) currentNode).getNbChildren() == 0
+                    && ((ClausewitzItem) currentNode).getNbLists() == 0 && ((ClausewitzItem) currentNode).getNbVariables() > 1) {
+                    ((ClausewitzItem) currentNode).setSameLine(true);
                 }
 
                 return;

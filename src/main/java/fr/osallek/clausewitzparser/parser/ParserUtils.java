@@ -60,9 +60,10 @@ final class ParserUtils {
                 continue;
             }
 
-            reader.reset();
             break;
         }
+
+        reader.reset();
 
         return quotedString.toString();
     }
