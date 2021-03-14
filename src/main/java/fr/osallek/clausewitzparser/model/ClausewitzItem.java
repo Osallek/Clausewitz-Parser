@@ -102,15 +102,11 @@ public final class ClausewitzItem extends ClausewitzPObject {
     }
 
     public ClausewitzItem addChild(String name) {
-        ClausewitzItem child = new ClausewitzItem(this, name, getNbObjects());
-        addChild(child);
-        return child;
+        return new ClausewitzItem(this, name, getNbObjects());
     }
 
     public ClausewitzItem addChild(String name, boolean hasEquals) {
-        ClausewitzItem child = new ClausewitzItem(this, name, getNbObjects(), hasEquals);
-        addChild(child);
-        return child;
+        return new ClausewitzItem(this, name, getNbObjects(), hasEquals);
     }
 
     public boolean removeChild(int id) {
@@ -585,7 +581,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList addList(String name, boolean sameLine, String... values) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects(), sameLine);
         list.addAll(values);
-        addList(list);
 
         return list;
     }
@@ -600,7 +595,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
         if (list == null) {
             list = new ClausewitzList(this, name, getNbObjects(), sameLine);
             list.addAll(values);
-            addList(list);
         } else {
             list.addAll(values);
         }
@@ -618,7 +612,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
         if (list == null) {
             list = new ClausewitzList(this, name, getNbObjects(), sameLine);
             list.addAll(values);
-            addList(list);
         } else {
             list.addAll(values);
         }
@@ -629,7 +622,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList addList(String name, String value) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.add(value);
-        addList(list);
 
         return list;
     }
@@ -637,7 +629,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList addList(String name, Integer value) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.add(value);
-        addList(list);
 
         return list;
     }
@@ -645,7 +636,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList addList(String name, String... values) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.addAll(values);
-        addList(list);
 
         return list;
     }
@@ -653,7 +643,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList addList(String name, List<String> values) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.addAll(values);
-        addList(list);
 
         return list;
     }
@@ -661,7 +650,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList addList(String name, Integer... values) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.addAll(values);
-        addList(list);
 
         return list;
     }
@@ -669,7 +657,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList addList(String name, Double... values) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.addAll(values);
-        addList(list);
 
         return list;
     }
@@ -677,7 +664,6 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList addList(String name, Boolean... values) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects());
         list.addAll(values);
-        addList(list);
 
         return list;
     }
