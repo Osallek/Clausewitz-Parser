@@ -852,6 +852,20 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return list;
     }
 
+    public List<ClausewitzItem> getChildrenStartWith(String name) {
+        List<ClausewitzItem> list = new ArrayList<>();
+
+        if (this.children != null) {
+            for (ClausewitzItem child : this.children) {
+                if (child.getName().startsWith(name)) {
+                    list.add(child);
+                }
+            }
+        }
+
+        return list;
+    }
+
     public ClausewitzList getList(int index) {
         if (index < 0 || this.lists == null || index >= this.lists.size()) {
             return null;
