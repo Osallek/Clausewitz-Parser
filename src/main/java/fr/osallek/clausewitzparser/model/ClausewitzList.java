@@ -320,12 +320,18 @@ public final class ClausewitzList extends ClausewitzPObject {
 
     @Override
     public void write(BufferedWriter bufferedWriter, int depth, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
+        write(bufferedWriter, false, depth, listeners);
+    }
+
+    @Override
+    public void write(BufferedWriter bufferedWriter, boolean spaced, int depth,
+                      Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         listeners.entrySet().stream().filter(entry -> entry.getKey().test(this)).forEach(entry -> entry.getValue().accept(this.getName()));
         ClausewitzUtils.printTabs(bufferedWriter, depth);
 
         if (ClausewitzUtils.isNotBlank(this.name)) {
             bufferedWriter.write(this.name);
-            ClausewitzUtils.printEquals(bufferedWriter);
+            ClausewitzUtils.printEquals(bufferedWriter, spaced);
         }
 
         ClausewitzUtils.printOpen(bufferedWriter);

@@ -164,9 +164,14 @@ public final class ClausewitzVariable extends ClausewitzObject {
 
     @Override
     public void write(BufferedWriter bufferedWriter, int depth, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
+        write(bufferedWriter, false, depth, listeners);
+    }
+
+    @Override
+    public void write(BufferedWriter bufferedWriter, boolean spaced, int depth, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         ClausewitzUtils.printTabs(bufferedWriter, depth);
         bufferedWriter.write(this.name);
-        ClausewitzUtils.printEquals(bufferedWriter);
+        ClausewitzUtils.printEquals(bufferedWriter, spaced);
         bufferedWriter.write(this.value);
     }
 }

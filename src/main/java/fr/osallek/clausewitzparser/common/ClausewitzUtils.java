@@ -120,12 +120,26 @@ public final class ClausewitzUtils {
     }
 
     public static void printEqualsOpen(BufferedWriter bufferedWriter) throws IOException {
-        printEquals(bufferedWriter);
+        printEqualsOpen(bufferedWriter, false);
+    }
+
+    public static void printEqualsOpen(BufferedWriter bufferedWriter, boolean spaced) throws IOException {
+        printEquals(bufferedWriter, spaced);
         printOpen(bufferedWriter);
     }
 
     public static void printEquals(BufferedWriter bufferedWriter) throws IOException {
         bufferedWriter.write("=");
+    }
+
+    public static void printEquals(BufferedWriter bufferedWriter, boolean spaced) throws IOException {
+        if (spaced) {
+            printSpace(bufferedWriter);
+            printEquals(bufferedWriter);
+            printSpace(bufferedWriter);
+        } else {
+            printEquals(bufferedWriter);
+        }
     }
 
     public static void printOpen(BufferedWriter bufferedWriter) throws IOException {

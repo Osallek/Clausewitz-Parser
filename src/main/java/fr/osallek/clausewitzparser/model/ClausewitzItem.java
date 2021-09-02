@@ -1315,13 +1315,19 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     @Override
     public void write(BufferedWriter bufferedWriter, int depth, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
+        write(bufferedWriter, false, depth, listeners);
+    }
+
+    @Override
+    public void write(BufferedWriter bufferedWriter, boolean spaced, int depth,
+                      Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (!DEFAULT_NAME.equals(getName())) {
             listeners.entrySet().stream().filter(entry -> entry.getKey().test(this)).forEach(entry -> entry.getValue().accept(this.getName()));
             ClausewitzUtils.printTabs(bufferedWriter, depth);
             bufferedWriter.write(this.name);
 
             if (this.hasEquals) {
-                ClausewitzUtils.printEqualsOpen(bufferedWriter);
+                ClausewitzUtils.printEqualsOpen(bufferedWriter, spaced);
             } else {
                 ClausewitzUtils.printOpen(bufferedWriter);
             }
@@ -1332,14 +1338,14 @@ public final class ClausewitzItem extends ClausewitzPObject {
                 ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
 
                 for (ClausewitzObject object : this.getAllOrdered()) {
-                    object.write(bufferedWriter, 0, listeners);
+                    object.write(bufferedWriter, spaced, 0, listeners);
                     ClausewitzUtils.printSpace(bufferedWriter);
                 }
 
                 bufferedWriter.newLine();
             } else {
                 for (ClausewitzObject object : this.getAllOrdered()) {
-                    object.write(bufferedWriter, depth + 1, listeners);
+                    object.write(bufferedWriter, spaced, depth + 1, listeners);
                     bufferedWriter.newLine();
                 }
             }
@@ -1350,7 +1356,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
             List<ClausewitzObject> objects = this.getAllOrdered();
 
             for (int i = 0; i < objects.size(); i++) {
-                objects.get(i).write(bufferedWriter, depth, listeners);
+                objects.get(i).write(bufferedWriter, spaced, depth, listeners);
 
                 if (i != objects.size() - 1) {
                     bufferedWriter.newLine();

@@ -36,6 +36,8 @@ public abstract class ClausewitzObject {
 
     public abstract void write(BufferedWriter bufferedWriter, int depth, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException;
 
+    public abstract void write(BufferedWriter bufferedWriter, boolean spaced, int depth, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException;
+
     @Override
     public String toString() {
         return name;
