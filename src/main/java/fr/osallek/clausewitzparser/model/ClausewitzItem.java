@@ -43,6 +43,17 @@ public final class ClausewitzItem extends ClausewitzPObject {
         this.hasEquals = hasEquals;
     }
 
+    public ClausewitzItem(ClausewitzItem parent, String name, int order, boolean hasEquals, boolean increaseOrder) {
+        super(name, order, parent);
+        this.hasEquals = hasEquals;
+
+        if (increaseOrder) {
+            parent.getAllOrdered().stream().filter(co -> !co.equals(this)).filter(co -> co.order >= order).forEach(co -> co.order++);
+        }
+
+        this.order = order;
+    }
+
     public boolean isSameLine() {
         return sameLine;
     }
@@ -98,7 +109,9 @@ public final class ClausewitzItem extends ClausewitzPObject {
             child.order = getNbObjects();
         }
 
-        getInternalChildren().add(child);
+        if (!getInternalChildren().contains(child)) {
+            getInternalChildren().add(child);
+        }
     }
 
     public ClausewitzItem addChild(String name) {
@@ -1289,6 +1302,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
         ClausewitzItem item = (ClausewitzItem) o;
         return sameLine == item.sameLine &&
+               Objects.equals(name, item.name) &&
                Objects.equals(children, item.children) &&
                Objects.equals(variables, item.variables) &&
                Objects.equals(lists, item.lists);
