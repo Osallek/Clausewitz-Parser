@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -197,6 +198,31 @@ public final class ClausewitzList extends ClausewitzPObject {
         set(id, ClausewitzUtils.dateToString(val));
     }
 
+    public void setAll(List<String> values) {
+        clear();
+        addAll(values);
+    }
+
+    public void setAll(String... values) {
+        clear();
+        addAll(values);
+    }
+
+    public void setAll(Integer... values) {
+        clear();
+        addAll(values);
+    }
+
+    public void setAll(Double... values) {
+        clear();
+        addAll(values);
+    }
+
+    public void setAll(Boolean... values) {
+        clear();
+        addAll(values);
+    }
+
     public void change(String previous, String newOne) {
         if (this.values != null) {
             if (ClausewitzUtils.isNotBlank(newOne)) {
@@ -286,17 +312,26 @@ public final class ClausewitzList extends ClausewitzPObject {
         return getValues().stream().map("yes"::equalsIgnoreCase).collect(Collectors.toList());
     }
 
+    public void sort(Comparator<String> comparator) {
+        if (this.values != null) {
+            this.values.sort(comparator);
+        }
+    }
+
+    public void sortInt() {
+        this.sort(Comparator.comparingInt(Integer::parseInt));
+    }
+
+    public void sortDouble() {
+        this.sort(Comparator.comparingDouble(Double::parseDouble));
+    }
+
     public boolean isSameLine() {
         return sameLine;
     }
 
     public boolean isEmpty() {
         return this.values == null || this.values.isEmpty();
-    }
-
-    @Override
-    public String getName() {
-        return super.getName();
     }
 
     @Override
