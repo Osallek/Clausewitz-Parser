@@ -588,11 +588,22 @@ public final class ClausewitzItem extends ClausewitzPObject {
     }
 
     public ClausewitzList addList(String name, boolean sameLine, Collection<String> values) {
-        return addList(name, sameLine, values.toArray(new String[0]));
+        return addList(name, sameLine, values.toArray(String[]::new));
+    }
+
+    public ClausewitzList addList(String name, boolean sameLine, boolean hasBrackets, Collection<String> values) {
+        return addList(name, sameLine, hasBrackets, values.toArray(String[]::new));
     }
 
     public ClausewitzList addList(String name, boolean sameLine, String... values) {
         ClausewitzList list = new ClausewitzList(this, name, getNbObjects(), sameLine);
+        list.addAll(values);
+
+        return list;
+    }
+
+    public ClausewitzList addList(String name, boolean sameLine, boolean hasBrackets, String... values) {
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects(), sameLine, hasBrackets);
         list.addAll(values);
 
         return list;
@@ -686,11 +697,11 @@ public final class ClausewitzItem extends ClausewitzPObject {
     }
 
     public ClausewitzList changeChildToList(int childOrder, String listName, Collection<String> values) {
-        return changeChildToList(childOrder, listName, false, values.toArray(new String[0]));
+        return changeChildToList(childOrder, listName, false, values.toArray(String[]::new));
     }
 
     public ClausewitzList changeChildToList(int childOrder, String listName, boolean sameLine, Collection<String> values) {
-        return changeChildToList(childOrder, listName, sameLine, values.toArray(new String[0]));
+        return changeChildToList(childOrder, listName, sameLine, values.toArray(String[]::new));
     }
 
     public ClausewitzList changeChildToList(int childOrder, String listName, boolean sameLine, String... values) {

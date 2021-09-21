@@ -22,19 +22,27 @@ public final class ClausewitzList extends ClausewitzPObject {
 
     private final boolean sameLine;
 
+    private final boolean hasBrackets;
+
     ClausewitzList(ClausewitzItem parent, String name, int order) {
         this(parent, name, order, false);
     }
 
     ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine) {
+        this(parent, name, order, sameLine, true);
+    }
+
+    ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine, boolean hasBrackets) {
         super(name, order, parent);
         this.sameLine = sameLine;
+        this.hasBrackets = hasBrackets;
     }
 
     ClausewitzList(ClausewitzList other) {
         super(other);
         this.values = other.values;
         this.sameLine = other.sameLine;
+        this.hasBrackets = other.hasBrackets;
     }
 
     private List<String> getInternalValues() {
@@ -330,6 +338,10 @@ public final class ClausewitzList extends ClausewitzPObject {
         return sameLine;
     }
 
+    public boolean isHasBrackets() {
+        return hasBrackets;
+    }
+
     public boolean isEmpty() {
         return this.values == null || this.values.isEmpty();
     }
@@ -369,18 +381,24 @@ public final class ClausewitzList extends ClausewitzPObject {
             ClausewitzUtils.printEquals(bufferedWriter, spaced);
         }
 
-        ClausewitzUtils.printOpen(bufferedWriter);
-        bufferedWriter.newLine();
+        if (this.hasBrackets) {
+            ClausewitzUtils.printOpen(bufferedWriter);
+            bufferedWriter.newLine();
+        }
 
         if (this.sameLine) {
-            ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
+            if (this.hasBrackets) {
+                ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
+            }
 
             for (String str : getInternalValues()) {
                 bufferedWriter.write(str);
                 ClausewitzUtils.printSpace(bufferedWriter);
             }
 
-            bufferedWriter.newLine();
+            if (this.hasBrackets) {
+                bufferedWriter.newLine();
+            }
         } else {
             for (String str : getInternalValues()) {
                 ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
@@ -389,7 +407,9 @@ public final class ClausewitzList extends ClausewitzPObject {
             }
         }
 
-        ClausewitzUtils.printTabs(bufferedWriter, depth);
-        ClausewitzUtils.printClose(bufferedWriter);
+        if (this.hasBrackets) {
+            ClausewitzUtils.printTabs(bufferedWriter, depth);
+            ClausewitzUtils.printClose(bufferedWriter);
+        }
     }
 }

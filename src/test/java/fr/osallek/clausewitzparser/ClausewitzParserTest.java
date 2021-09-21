@@ -137,6 +137,20 @@ class ClausewitzParserTest {
         ClausewitzItem child = root.getChild("luxemburg_liege_area");
         Assertions.assertNotNull(child);
         Assertions.assertTrue(child.isEmpty());
+
+        child = root.getChild("brittany_area");
+        Assertions.assertNotNull(child);
+        Assertions.assertFalse(child.isEmpty());
+
+        list = child.getList("color");
+        Assertions.assertNotNull(list);
+        Assertions.assertTrue(list.contains("118"));
+        Assertions.assertFalse(list.contains("1321"));
+
+        list = child.getList("");
+        Assertions.assertNotNull(list);
+        Assertions.assertTrue(list.contains("171"));
+        Assertions.assertFalse(list.contains("1321"));
     }
 
     @Test

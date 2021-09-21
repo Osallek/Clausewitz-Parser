@@ -116,4 +116,22 @@ final class ParserUtils {
 
         reader.reset();
     }
+
+    static String readTillNextNoMark(BufferedReader reader, int stopChar, boolean stopEndOfLine) throws IOException {
+        int letter;
+        StringBuilder stringBuilder = new StringBuilder();
+
+        while ((letter = reader.read()) > -1) {
+            stringBuilder.append((char) letter);
+            if (stopEndOfLine && '\n' == letter) {
+                break;
+            }
+
+            if (stopChar == letter) {
+                break;
+            }
+        }
+
+        return stringBuilder.toString();
+    }
 }

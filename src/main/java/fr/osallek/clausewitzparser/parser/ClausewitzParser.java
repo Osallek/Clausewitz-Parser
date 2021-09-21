@@ -2,6 +2,7 @@ package fr.osallek.clausewitzparser.parser;
 
 import fr.osallek.clausewitzparser.common.ClausewitzParseException;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import org.slf4j.Logger;
@@ -250,7 +251,7 @@ public class ClausewitzParser {
             }
 
             if ('{' == letter) {
-                currentNode = new ClausewitzItem((ClausewitzItem) currentNode, strings.isEmpty() ? "" : strings.get(0), 0, isEquals);
+                currentNode = new ClausewitzItem((ClausewitzItem) currentNode, strings.isEmpty() ? "" : strings.get(strings.size() - 1), 0, isEquals);
                 ClausewitzPObject finalCurrentNode = currentNode;
                 listeners.entrySet()
                          .stream()
@@ -260,7 +261,10 @@ public class ClausewitzParser {
 
                 currentNode = currentNode.getParent();
                 isEquals = false;
-                strings.clear();
+
+                if (!strings.isEmpty()) {
+                    strings.remove(strings.size() - 1);
+                }
 
                 if (readOnlyOneObject && (currentNode.getParent() == null)) { //Is root node and just read one object
                     break;
@@ -274,7 +278,11 @@ public class ClausewitzParser {
                     ClausewitzItem previousItem = currentNode.getParent().getLastChild(currentNode.getName());
 
                     if (previousItem != null) {
-                        currentNode = currentNode.getParent().changeChildToList(previousItem.getOrder(), currentNode.getName(), strings.size() > 1 && nbNewLine <= 2, strings);
+                        if (previousItem.getAllOrdered().isEmpty()) {
+                            currentNode = currentNode.getParent().changeChildToList(previousItem.getOrder(), currentNode.getName(), strings.size() > 1 && nbNewLine <= 2, strings);
+                        } else {
+                            previousItem.addList("", strings.size() > 1 && nbNewLine <= previousItem.getNbObjects() * 2 + 2, false, strings);
+                        }
                     } else {
                         currentNode = currentNode.getParent().addList(currentNode.getName(), strings.size() > 1 && nbNewLine <= 2, strings);
                     }
