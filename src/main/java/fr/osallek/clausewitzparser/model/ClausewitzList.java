@@ -326,12 +326,16 @@ public final class ClausewitzList extends ClausewitzPObject {
         }
     }
 
+    public void sort() {
+        sort(Comparator.naturalOrder());
+    }
+
     public void sortInt() {
-        this.sort(Comparator.comparingInt(Integer::parseInt));
+        sort(Comparator.comparingInt(Integer::parseInt));
     }
 
     public void sortDouble() {
-        this.sort(Comparator.comparingDouble(Double::parseDouble));
+        sort(Comparator.comparingDouble(Double::parseDouble));
     }
 
     public boolean isSameLine() {
