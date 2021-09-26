@@ -24,21 +24,21 @@ public final class ClausewitzList extends ClausewitzPObject {
 
     private final boolean hasBrackets;
 
-    ClausewitzList(ClausewitzItem parent, String name, int order) {
+    public ClausewitzList(ClausewitzItem parent, String name, int order) {
         this(parent, name, order, false);
     }
 
-    ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine) {
+    public ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine) {
         this(parent, name, order, sameLine, true);
     }
 
-    ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine, boolean hasBrackets) {
+    public ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine, boolean hasBrackets) {
         super(name, order, parent);
         this.sameLine = sameLine;
         this.hasBrackets = hasBrackets;
     }
 
-    ClausewitzList(ClausewitzList other) {
+    public ClausewitzList(ClausewitzList other) {
         super(other);
         this.values = other.values;
         this.sameLine = other.sameLine;
