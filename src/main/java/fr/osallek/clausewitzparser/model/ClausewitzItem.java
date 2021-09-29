@@ -974,8 +974,24 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return null;
     }
 
+    public ClausewitzVariable getVar(String varName, String value) {
+        if (this.variables != null) {
+            for (ClausewitzVariable var : this.variables) {
+                if (var.getName().equalsIgnoreCase(varName) && var.getValue().equalsIgnoreCase(value)) {
+                    return var;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public boolean hasVar(String varName) {
         return getVar(varName) != null;
+    }
+
+    public boolean hasVar(String varName, String value) {
+        return getVar(varName, value) != null;
     }
 
     public ClausewitzVariable getVar(String varName, int index) {
