@@ -55,7 +55,7 @@ public final class ClausewitzUtils {
 
     public static String addQuotes(String s) {
         if (s == null || s.length() < 1) {
-            return null;
+            return s;
         }
 
         if ('"' != s.charAt(0)) {
@@ -70,8 +70,8 @@ public final class ClausewitzUtils {
     }
 
     public static String removeQuotes(String s) {
-        if (s == null) {
-            return null;
+        if (s == null || s.length() < 1) {
+            return s;
         }
 
         if ('"' == s.charAt(0)) {
