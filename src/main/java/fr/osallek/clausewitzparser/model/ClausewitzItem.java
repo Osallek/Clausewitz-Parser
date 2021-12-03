@@ -1243,6 +1243,10 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return objects;
     }
 
+    public int getMaxOrder() {
+        return getAllOrdered().stream().mapToInt(ClausewitzObject::getOrder).max().orElse(0);
+    }
+
     public boolean removeByOrder(int order) {
         if (this.lists != null) {
             for (int i = 0; i < this.lists.size(); i++) {
