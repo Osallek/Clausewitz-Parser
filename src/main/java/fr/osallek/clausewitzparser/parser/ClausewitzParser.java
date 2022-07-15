@@ -2,18 +2,15 @@ package fr.osallek.clausewitzparser.parser;
 
 import fr.osallek.clausewitzparser.common.ClausewitzParseException;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
@@ -26,6 +23,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClausewitzParser {
 
@@ -39,21 +38,23 @@ public class ClausewitzParser {
     }
 
     public static ClausewitzItem parse(File file, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) {
-        return parse(file, skip, listeners, false);
+        try {
+            return parse(file, skip, listeners, StandardCharsets.ISO_8859_1);
+        } catch (ClausewitzParseException e) {
+            if (CharacterCodingException.class.equals(e.getCause().getClass())) {
+                return parse(file, skip, listeners, StandardCharsets.UTF_8);
+            } else {
+                throw e;
+            }
+        }
     }
 
-    private static ClausewitzItem parse(File file, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners, boolean retryCharset) {
+    public static ClausewitzItem parse(File file, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners, Charset charset) {
         ClausewitzItem root;
         Instant start = Instant.now();
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), retryCharset ? StandardCharsets.UTF_8 : StandardCharsets.ISO_8859_1)) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
             root = parse(reader, skip, listeners);
-        } catch (CharacterCodingException e) {
-            if (!retryCharset) {
-                return parse(file, skip, listeners, true);
-            } else {
-                throw new ClausewitzParseException(e);
-            }
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read file {}: {} !", file.getAbsolutePath(), e.getMessage(), e);
             throw new ClausewitzParseException(e);
@@ -71,10 +72,18 @@ public class ClausewitzParser {
     }
 
     public static ClausewitzItem parse(ZipFile zipFile, String entryName, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) {
-        return parse(zipFile, entryName, skip, listeners, false);
+        try {
+            return parse(zipFile, entryName, skip, listeners, StandardCharsets.ISO_8859_1);
+        } catch (ClausewitzParseException e) {
+            if (CharacterCodingException.class.equals(e.getCause().getClass())) {
+                return parse(zipFile, entryName, skip, listeners, StandardCharsets.UTF_8);
+            } else {
+                throw e;
+            }
+        }
     }
 
-    private static ClausewitzItem parse(ZipFile zipFile, String entryName, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners, boolean retryCharset) {
+    public static ClausewitzItem parse(ZipFile zipFile, String entryName, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners, Charset charset) {
         ClausewitzItem root = null;
         Instant start = Instant.now();
 
@@ -90,15 +99,9 @@ public class ClausewitzParser {
         }
 
         try (InputStream stream = zipFile.getInputStream(zipEntry);
-             InputStreamReader inputStreamReader = new InputStreamReader(stream, retryCharset ? StandardCharsets.UTF_8 : StandardCharsets.ISO_8859_1);
+             InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
              BufferedReader reader = new BufferedReader(inputStreamReader)) {
             root = parse(reader, skip, listeners);
-        } catch (CharacterCodingException e) {
-            if (!retryCharset) {
-                return parse(zipFile, entryName, skip, listeners, true);
-            } else {
-                throw new ClausewitzParseException(e);
-            }
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
         }
@@ -122,24 +125,26 @@ public class ClausewitzParser {
     }
 
     public static ClausewitzObject readSingleObject(File file, int skip, String objectName) {
-        return readSingleObject(file, skip, objectName, false);
+        try {
+            return readSingleObject(file, skip, objectName, StandardCharsets.ISO_8859_1);
+        } catch (ClausewitzParseException e) {
+            if (CharacterCodingException.class.equals(e.getCause().getClass())) {
+                return readSingleObject(file, skip, objectName, StandardCharsets.UTF_8);
+            } else {
+                throw e;
+            }
+        }
     }
 
-    private static ClausewitzObject readSingleObject(File file, int skip, String objectName, boolean retryCharset) {
+    public static ClausewitzObject readSingleObject(File file, int skip, String objectName, Charset charset) {
         if (objectName == null) {
             throw new NullPointerException("objectName is null");
         }
 
         ClausewitzItem root = new ClausewitzItem();
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), retryCharset ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
             readSingleObject(reader, skip, root, objectName);
-        } catch (CharacterCodingException e) {
-            if (!retryCharset) {
-                return readSingleObject(file, skip, objectName, true);
-            } else {
-                throw new ClausewitzParseException(e);
-            }
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read file {}: {} !", file.getAbsolutePath(), e.getMessage(), e);
             throw new ClausewitzParseException(e);
@@ -149,10 +154,18 @@ public class ClausewitzParser {
     }
 
     public static ClausewitzObject readSingleObject(ZipFile zipFile, String entryName, int skip, String objectName) {
-        return readSingleObject(zipFile, entryName, skip, objectName, false);
+        try {
+            return readSingleObject(zipFile, entryName, skip, objectName, StandardCharsets.ISO_8859_1);
+        } catch (ClausewitzParseException e) {
+            if (CharacterCodingException.class.equals(e.getCause().getClass())) {
+                return readSingleObject(zipFile, entryName, skip, objectName, StandardCharsets.UTF_8);
+            } else {
+                throw e;
+            }
+        }
     }
 
-    private static ClausewitzObject readSingleObject(ZipFile zipFile, String entryName, int skip, String objectName, boolean retryCharset) {
+    private static ClausewitzObject readSingleObject(ZipFile zipFile, String entryName, int skip, String objectName, Charset charset) {
         if (objectName == null) {
             throw new NullPointerException("objectName is null");
         }
@@ -170,15 +183,9 @@ public class ClausewitzParser {
         }
 
         try (InputStream stream = zipFile.getInputStream(zipEntry);
-             InputStreamReader inputStreamReader = new InputStreamReader(stream, retryCharset ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8);
+             InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
              BufferedReader reader = new BufferedReader(inputStreamReader)) {
             readSingleObject(reader, skip, root, objectName);
-        } catch (CharacterCodingException e) {
-            if (!retryCharset) {
-                return readSingleObject(zipFile, entryName, skip, objectName, true);
-            } else {
-                throw new ClausewitzParseException(e);
-            }
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
         }
@@ -279,7 +286,9 @@ public class ClausewitzParser {
 
                     if (previousItem != null) {
                         if (previousItem.getAllOrdered().isEmpty()) {
-                            currentNode = currentNode.getParent().changeChildToList(previousItem.getOrder(), currentNode.getName(), strings.size() > 1 && nbNewLine <= 2, strings);
+                            currentNode = currentNode.getParent()
+                                                     .changeChildToList(previousItem.getOrder(), currentNode.getName(),
+                                                                        strings.size() > 1 && nbNewLine <= 2, strings);
                         } else {
                             previousItem.addList("", strings.size() > 1 && nbNewLine <= previousItem.getNbObjects() * 2 + 2, false, strings);
                         }
