@@ -104,7 +104,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
         if (ClausewitzUtils.isNotBlank(var)) {
             try {
                 return ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(var));
-            } catch (DateTimeException e) {
+            } catch (Exception e) {
                 return null;
             }
         } else {

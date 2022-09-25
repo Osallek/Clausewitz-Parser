@@ -46,7 +46,17 @@ public final class ClausewitzUtils {
     }
 
     public static LocalDate stringToDate(String s) {
-        return LocalDate.parse(s, DATE_FORMAT);
+        s = ClausewitzUtils.removeQuotes(s);
+        if (DATE_PATTERN.matcher(s).matches()) {
+            return LocalDate.parse(s, DATE_FORMAT);
+        } else {
+            long dateLong = Long.parseLong(s);
+            dateLong /= 24;
+
+            int year = (int) ((dateLong / 365) - 5000);
+            LocalDate date = LocalDate.of(year, 1, 1);
+            return date.withDayOfYear((int) (dateLong % 365 + 2));
+        }
     }
 
     public static boolean hasQuotes(String s) {

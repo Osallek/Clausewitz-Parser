@@ -9,15 +9,32 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.zip.ZipFile;
 
 class ClausewitzParserTest {
 
-    static final Path RESOURCE_FOLDER = Paths.get("src/test/resources");
+    static final Path RESOURCE_FOLDER = Path.of("src/test/resources");
+
+    @Test
+    void testBinary() throws IOException, ClassNotFoundException {
+        File tokens = RESOURCE_FOLDER.resolve("tokens.txt").toFile();
+        File file = RESOURCE_FOLDER.resolve("binary_gamestate").toFile();
+
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.ISO_8859_1);
+             FileInputStream tokensFileStream = new FileInputStream(tokens); ObjectInputStream tokensStream = new ObjectInputStream(tokensFileStream)) {
+            ClausewitzParser.convertBinary(reader, StandardCharsets.ISO_8859_1, 6, (Map<Integer, String>) tokensStream.readObject());
+        }
+    }
 
     @Test
     void testParseFlatSave() {
