@@ -109,9 +109,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
             child.order = getNbObjects();
         }
 
-        if (!getInternalChildren().contains(child)) {
-            getInternalChildren().add(child);
-        }
+        getInternalChildren().add(child);
     }
 
     public ClausewitzItem addChild(String name) {
