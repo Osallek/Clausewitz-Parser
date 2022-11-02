@@ -337,7 +337,9 @@ public class ClausewitzParser {
             }
 
             if (isEquals) { //Value
-                ((ClausewitzItem) currentNode).addVariable(strings.get(0), ParserUtils.readStringOrNumber(reader, letter).trim());
+                if (strings.size() > 0) {
+                    ((ClausewitzItem) currentNode).addVariable(strings.get(0), ParserUtils.readStringOrNumber(reader, letter).trim());
+                }
                 isEquals = false;
                 strings.clear();
             } else { //Key
