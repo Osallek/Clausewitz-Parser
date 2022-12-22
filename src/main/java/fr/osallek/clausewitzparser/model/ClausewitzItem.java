@@ -607,6 +607,20 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return list;
     }
 
+    public ClausewitzList addList(String name, boolean sameLine, boolean hasBrackets, boolean increaseOrder, String... values) {
+        ClausewitzList list = new ClausewitzList(this, name, getNbObjects(), sameLine, hasBrackets, increaseOrder);
+        list.addAll(values);
+
+        return list;
+    }
+
+    public ClausewitzList addList(String name, int order, boolean sameLine, boolean hasBrackets, boolean increaseOrder, String... values) {
+        ClausewitzList list = new ClausewitzList(this, name, order, sameLine, hasBrackets, increaseOrder);
+        list.addAll(values);
+
+        return list;
+    }
+
     public ClausewitzList addToExistingList(String name, String... values) {
         return addToExistingList(name, false, values);
     }

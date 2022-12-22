@@ -33,9 +33,17 @@ public final class ClausewitzList extends ClausewitzPObject {
     }
 
     public ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine, boolean hasBrackets) {
+        this(parent, name, order, sameLine, hasBrackets, false);
+    }
+
+    public ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine, boolean hasBrackets, boolean increaseOrder) {
         super(name, order, parent);
         this.sameLine = sameLine;
         this.hasBrackets = hasBrackets;
+
+        if (increaseOrder) {
+            parent.getAllOrdered().stream().filter(co -> !co.equals(this)).filter(co -> co.order >= order).forEach(co -> co.order++);
+        }
     }
 
     public ClausewitzList(ClausewitzList other) {
