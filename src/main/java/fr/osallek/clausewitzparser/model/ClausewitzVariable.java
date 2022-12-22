@@ -4,7 +4,6 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
@@ -59,51 +58,51 @@ public final class ClausewitzVariable extends ClausewitzObject {
     }
 
     public Integer getAsInt() {
-        String var = getValue();
+        String s = getValue();
 
-        if (ClausewitzUtils.isNotBlank(var)) {
-            return Integer.parseInt(ClausewitzUtils.removeQuotes(var));
+        if (ClausewitzUtils.isNotBlank(s)) {
+            return Integer.parseInt(ClausewitzUtils.removeQuotes(s));
         } else {
             return null;
         }
     }
 
     public Long getAsLong() {
-        String var = getValue();
+        String s = getValue();
 
-        if (ClausewitzUtils.isNotBlank(var)) {
-            return Long.parseLong(ClausewitzUtils.removeQuotes(var));
+        if (ClausewitzUtils.isNotBlank(s)) {
+            return Long.parseLong(ClausewitzUtils.removeQuotes(s));
         } else {
             return null;
         }
     }
 
     public Double getAsDouble() {
-        String var = getValue();
+        String s = getValue();
 
-        if (ClausewitzUtils.isNotBlank(var)) {
-            return Double.parseDouble(ClausewitzUtils.removeQuotes(var));
+        if (ClausewitzUtils.isNotBlank(s)) {
+            return Double.parseDouble(ClausewitzUtils.removeQuotes(s));
         } else {
             return null;
         }
     }
 
     public Boolean getAsBool() {
-        String var = getValue();
+        String s = getValue();
 
-        if (ClausewitzUtils.isNotBlank(var)) {
-            return "yes".equals(ClausewitzUtils.removeQuotes(var));
+        if (ClausewitzUtils.isNotBlank(s)) {
+            return "yes".equals(ClausewitzUtils.removeQuotes(s));
         } else {
             return null;
         }
     }
 
     public LocalDate getAsDate() {
-        String var = getValue();
+        String s = getValue();
 
-        if (ClausewitzUtils.isNotBlank(var)) {
+        if (ClausewitzUtils.isNotBlank(s)) {
             try {
-                return ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(var));
+                return ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(s));
             } catch (Exception e) {
                 return null;
             }

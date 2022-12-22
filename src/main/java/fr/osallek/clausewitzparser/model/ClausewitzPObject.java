@@ -4,30 +4,34 @@ public abstract class ClausewitzPObject extends ClausewitzObject {
 
     protected final ClausewitzItem parent;
 
-    public ClausewitzPObject(String name, int order, ClausewitzItem parent) {
+    protected ClausewitzPObject(String name, int order, ClausewitzItem parent, boolean increaseOrder) {
         super(name, order);
         this.parent = parent;
 
         if (this.parent != null) {
-            this.parent.addObject(this);
+            this.parent.addObject(this, increaseOrder);
         }
     }
 
-    public ClausewitzPObject(ClausewitzObject other, ClausewitzItem parent) {
+    protected ClausewitzPObject(ClausewitzObject other, ClausewitzItem parent) {
+        this(other, parent, false);
+    }
+
+    protected ClausewitzPObject(ClausewitzObject other, ClausewitzItem parent, boolean increaseOrder) {
         super(other);
         this.parent = parent;
 
         if (this.parent != null) {
-            this.parent.addObject(this);
+            this.parent.addObject(this, increaseOrder);
         }
     }
 
-    public ClausewitzPObject(ClausewitzPObject other) {
+    protected ClausewitzPObject(ClausewitzPObject other) {
         super(other);
         this.parent = other.parent;
 
         if (this.parent != null) {
-            this.parent.addObject(this);
+            this.parent.addObject(this, false);
         }
     }
 

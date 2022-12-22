@@ -39,30 +39,24 @@ public final class LuaParser {
 
         int letter;
         while ((letter = reader.read()) > -1) {
-            if ('\n' == letter) {
-                if (isDot) {
-                    return map;
-                }
+            if ('\n' == letter && isDot) {
+                return map;
             }
 
             if (Character.isWhitespace(letter)) {
                 continue;
             }
 
-            if ('"' == letter) {
-                if (isEquals) {
-                    map.put(key, ParserUtils.readQuoted(reader, false));
-                    isEquals = false;
-                    continue;
-                }
+            if ('"' == letter && isEquals) {
+                map.put(key, ParserUtils.readQuoted(reader, false));
+                isEquals = false;
+                continue;
             }
 
-            if ('{' == letter) {
-                if (isEquals) {
-                    map.put(key, parse(reader, (Map<String, Object>) map.getOrDefault(key, new LinkedHashMap<>()), false));
-                    isEquals = false;
-                    continue;
-                }
+            if ('{' == letter && isEquals) {
+                map.put(key, parse(reader, (Map<String, Object>) map.getOrDefault(key, new LinkedHashMap<>()), false));
+                isEquals = false;
+                continue;
             }
 
             if ('.' == letter) {
@@ -101,12 +95,10 @@ public final class LuaParser {
                 continue;
             }
 
-            if (Character.isDigit(letter)) {
-                if (isEquals) {
-                    map.put(key, ParserUtils.readNumber(reader, letter));
-                    isEquals = false;
-                    continue;
-                }
+            if (Character.isDigit(letter) && isEquals) {
+                map.put(key, ParserUtils.readNumber(reader, letter));
+                isEquals = false;
+                continue;
             }
 
             key = ParserUtils.readString(reader, letter);

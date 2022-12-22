@@ -12,12 +12,12 @@ public abstract class ClausewitzObject {
 
     protected int order;
 
-    public ClausewitzObject(String name, int order) {
+    protected ClausewitzObject(String name, int order) {
         this.name = name == null ? null : name.intern();
         this.order = order;
     }
 
-    public ClausewitzObject(ClausewitzObject other) {
+    protected ClausewitzObject(ClausewitzObject other) {
         this.name = other.name;
         this.order = other.order;
     }

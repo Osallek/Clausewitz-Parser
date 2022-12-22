@@ -37,7 +37,7 @@ public final class ClausewitzList extends ClausewitzPObject {
     }
 
     public ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine, boolean hasBrackets, boolean increaseOrder) {
-        super(name, order, parent);
+        super(name, order, parent, increaseOrder);
         this.sameLine = sameLine;
         this.hasBrackets = hasBrackets;
 
@@ -70,41 +70,41 @@ public final class ClausewitzList extends ClausewitzPObject {
     }
 
     public Integer getAsInt(int id) {
-        String var = get(id);
+        String s = get(id);
 
-        if (ClausewitzUtils.isNotBlank(var)) {
-            return Integer.parseInt(var);
+        if (ClausewitzUtils.isNotBlank(s)) {
+            return Integer.parseInt(s);
         } else {
             return null;
         }
     }
 
     public Double getAsDouble(int id) {
-        String var = get(id);
+        String s = get(id);
 
-        if (ClausewitzUtils.isNotBlank(var)) {
-            return Double.parseDouble(var);
+        if (ClausewitzUtils.isNotBlank(s)) {
+            return Double.parseDouble(s);
         } else {
             return null;
         }
     }
 
     public Boolean getAsBool(int id) {
-        String var = get(id);
+        String s = get(id);
 
-        if (ClausewitzUtils.isNotBlank(var)) {
-            return "yes".equals(var);
+        if (ClausewitzUtils.isNotBlank(s)) {
+            return "yes".equals(s);
         } else {
             return null;
         }
     }
 
     public LocalDate getAsDate(int id) {
-        String var = get(id);
+        String s = get(id);
 
-        if (ClausewitzUtils.isNotBlank(var)) {
+        if (ClausewitzUtils.isNotBlank(s)) {
             try {
-                return ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(var));
+                return ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(s));
             } catch (DateTimeException e) {
                 return null;
             }
@@ -172,6 +172,7 @@ public final class ClausewitzList extends ClausewitzPObject {
             if (val.indexOf(' ') >= 0 && !ClausewitzUtils.hasQuotes(val)) {
                 val = ClausewitzUtils.addQuotes(val);
             }
+
             getInternalValues().add(val.intern());
         }
     }
@@ -240,28 +241,24 @@ public final class ClausewitzList extends ClausewitzPObject {
     }
 
     public void change(String previous, String newOne) {
-        if (this.values != null) {
-            if (ClausewitzUtils.isNotBlank(newOne)) {
-                Integer index = null;
+        if (this.values != null && ClausewitzUtils.isNotBlank(newOne)) {
+            Integer index = null;
 
-                for (int i = 0; i < this.values.size(); i++) {
-                    if (this.values.get(i).equalsIgnoreCase(previous)) {
-                        index = i;
-                        break;
-                    }
+            for (int i = 0; i < this.values.size(); i++) {
+                if (this.values.get(i).equalsIgnoreCase(previous)) {
+                    index = i;
+                    break;
                 }
+            }
 
-                if (index != null) {
-                    set(index, newOne);
-                }
+            if (index != null) {
+                set(index, newOne);
             }
         }
     }
 
     public void addAll(List<String> values) {
-        for (String s : values) {
-            add(s);
-        }
+        values.forEach(this::add);
     }
 
     public void addAll(String... values) {
@@ -359,17 +356,16 @@ public final class ClausewitzList extends ClausewitzPObject {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
-        } else if (!(obj instanceof ClausewitzList)) {
+        }
+
+        if (!(o instanceof ClausewitzList clausewitzList)) {
             return false;
         }
 
-        final ClausewitzList clausewitzList = (ClausewitzList) obj;
-
-        return name.equals(clausewitzList.name)
-               && values.equals(clausewitzList.values);
+        return name.equals(clausewitzList.name) && values.equals(clausewitzList.values);
     }
 
     @Override

@@ -337,7 +337,7 @@ public class ClausewitzParser {
             }
 
             if (isEquals) { //Value
-                if (strings.size() > 0) {
+                if (!strings.isEmpty()) {
                     ((ClausewitzItem) currentNode).addVariable(strings.get(0), ParserUtils.readStringOrNumber(reader, letter).trim());
                 }
                 isEquals = false;
