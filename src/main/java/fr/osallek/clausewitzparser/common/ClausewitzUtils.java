@@ -55,7 +55,7 @@ public final class ClausewitzUtils {
 
             int year = (int) ((dateLong / 365) - 5000);
             LocalDate date = LocalDate.of(year, 1, 1);
-            return date.withDayOfYear((int) (dateLong % 365 + 2));
+            return date.withDayOfYear((int) (dateLong % 365 + 1));
         }
     }
 
