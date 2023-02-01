@@ -1,12 +1,18 @@
 package fr.osallek.clausewitzparser.parser;
 
 import fr.osallek.clausewitzparser.common.ClausewitzParseException;
+import fr.osallek.clausewitzparser.ic4j.CharsetDetector;
 import fr.osallek.clausewitzparser.model.BinaryToken;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,8 +33,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ClausewitzParser {
 
@@ -43,12 +47,17 @@ public class ClausewitzParser {
 
     public static ClausewitzItem parse(File file, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) {
         try {
-            return parse(file, skip, listeners, StandardCharsets.ISO_8859_1);
-        } catch (ClausewitzParseException e) {
-            if (CharacterCodingException.class.equals(e.getCause().getClass())) {
-                return parse(file, skip, listeners, StandardCharsets.UTF_8);
-            } else {
-                throw e;
+            return parse(file, skip, listeners,
+                         Charset.forName(new CharsetDetector().setText(new BufferedInputStream(new FileInputStream(file))).detect().getName()));
+        } catch (IOException | ClausewitzParseException ignored) {
+            try {
+                return parse(file, skip, listeners, StandardCharsets.ISO_8859_1);
+            } catch (ClausewitzParseException e) {
+                if (CharacterCodingException.class.equals(e.getCause().getClass())) {
+                    return parse(file, skip, listeners, StandardCharsets.UTF_8);
+                } else {
+                    throw e;
+                }
             }
         }
     }
@@ -59,6 +68,8 @@ public class ClausewitzParser {
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
             root = parse(reader, skip, listeners);
+        } catch (CharacterCodingException e) {
+            throw new ClausewitzParseException(e);
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read file {}: {} !", file.getAbsolutePath(), e.getMessage(), e);
             throw new ClausewitzParseException(e);
@@ -150,6 +161,8 @@ public class ClausewitzParser {
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
             readSingleObject(reader, skip, root, objectName);
+        } catch (CharacterCodingException e) {
+            throw new ClausewitzParseException(e);
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read file {}: {} !", file.getAbsolutePath(), e.getMessage(), e);
             throw new ClausewitzParseException(e);
@@ -177,6 +190,8 @@ public class ClausewitzParser {
              InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
              BufferedReader reader = new BufferedReader(inputStreamReader)) {
             return convertBinary(reader, charset, skip, tokens, objectName, new HashMap<>());
+        } catch (CharacterCodingException e) {
+            throw new ClausewitzParseException(e);
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
             throw new ClausewitzParseException(e);
