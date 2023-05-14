@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -20,6 +22,8 @@ import java.util.stream.Stream;
 public final class ClausewitzItem extends ClausewitzPObject {
 
     public static final String DEFAULT_NAME = "clausewitzparser";
+
+    private Map<String, List<ClausewitzItem>> mapChildren;
 
     private List<ClausewitzItem> children;
 
@@ -56,12 +60,43 @@ public final class ClausewitzItem extends ClausewitzPObject {
         this.sameLine = sameLine;
     }
 
-    private List<ClausewitzItem> getInternalChildren() {
+    private void internalClean() {
+        if (this.mapChildren != null) {
+            this.mapChildren.entrySet().removeIf(e -> e.getValue().isEmpty());
+
+            if (this.mapChildren.isEmpty()) {
+                this.mapChildren = null;
+            }
+        }
+
+        if (this.children != null && this.children.isEmpty()) {
+            this.children = null;
+        }
+
+        if (this.variables != null && this.variables.isEmpty()) {
+            this.variables = null;
+        }
+
+        if (this.lists != null && this.lists.isEmpty()) {
+            this.lists = null;
+        }
+    }
+
+    private void initInternalChildren() {
         if (this.children == null) {
             this.children = new ArrayList<>(0);
         }
 
-        return this.children;
+        if (this.mapChildren == null) {
+            this.mapChildren = new HashMap<>();
+        }
+    }
+
+    private void internalAddChild(ClausewitzItem item) {
+        initInternalChildren();
+        this.mapChildren.putIfAbsent(item.name, new ArrayList<>());
+        this.mapChildren.get(item.name).add(item);
+        this.children.add(item);
     }
 
     private List<ClausewitzVariable> getInternalVariables() {
@@ -98,12 +133,12 @@ public final class ClausewitzItem extends ClausewitzPObject {
         }
 
         if (increaseOrders) {
-            this.getAllOrdered().stream().filter(co -> co.order >= child.order).forEach(co -> co.order++);
+            getAllOrdered().stream().filter(co -> co.order >= child.order).forEach(co -> co.order++);
         } else {
             child.order = getNbObjects();
         }
 
-        getInternalChildren().add(child);
+        internalAddChild(child);
     }
 
     public ClausewitzItem addChild(String name) {
@@ -114,9 +149,26 @@ public final class ClausewitzItem extends ClausewitzPObject {
         return new ClausewitzItem(this, name, getNbObjects(), hasEquals);
     }
 
+    private boolean internalRemoveChild(ClausewitzItem item) {
+        if (this.mapChildren == null) {
+            return false;
+        }
+
+        List<ClausewitzItem> list = this.mapChildren.get(item.name);
+
+        if (list != null) {
+            list.remove(item);
+            boolean removed = this.children.remove(item);
+            internalClean();
+            return removed;
+        }
+
+        return false;
+    }
+
     public boolean removeChild(int id) {
         if (this.children != null) {
-            return this.children.remove(id) != null;
+            return internalRemoveChild(this.children.get(id));
         }
 
         return false;
@@ -124,7 +176,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public boolean removeChild(ClausewitzItem child) {
         if (this.children != null) {
-            return this.children.remove(child);
+            return internalRemoveChild(child);
         }
 
         return false;
@@ -132,14 +184,22 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public boolean removeChild(String childName, int id) {
         if (this.children != null) {
-            int j = 0;
-            for (int i = 0; i < this.children.size(); i++) {
-                if (this.children.get(i).getName().equalsIgnoreCase(childName)) {
-                    if (j == id) {
-                        return this.children.remove(i) != null;
-                    }
+            List<ClausewitzItem> list = this.mapChildren.get(childName);
 
-                    j++;
+            if (list == null) {
+                return false;
+            } else {
+                ClausewitzItem item = list.remove(id);
+                if (list.isEmpty()) {
+                    this.mapChildren.remove(item.name);
+                }
+
+                if (item != null) {
+                    this.children.remove(item);
+                    internalClean();
+                    return true;
+                } else {
+                    return false;
                 }
             }
         }
@@ -149,10 +209,16 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public boolean removeChild(String childName) {
         if (this.children != null) {
-            for (int i = 0; i < this.children.size(); i++) {
-                if (this.children.get(i).getName().equalsIgnoreCase(childName)) {
-                    return this.children.remove(i) != null;
-                }
+            List<ClausewitzItem> list = this.mapChildren.get(childName);
+
+            if (list == null) {
+                return false;
+            } else {
+                ClausewitzItem item = list.get(0);
+                list.remove(0);
+                this.children.remove(item);
+                internalClean();
+                return true;
             }
         }
 
@@ -161,10 +227,16 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public boolean removeLastChild(String childName) {
         if (this.children != null) {
-            for (int i = this.children.size() - 1; i >= 0; i--) {
-                if (this.children.get(i).getName().equalsIgnoreCase(childName)) {
-                    return this.children.remove(i) != null;
-                }
+            List<ClausewitzItem> list = this.mapChildren.get(childName);
+
+            if (list == null) {
+                return false;
+            } else {
+                ClausewitzItem item = list.get(list.size() - 1);
+                list.remove(list.size() - 1);
+                this.children.remove(item);
+                internalClean();
+                return true;
             }
         }
 
@@ -173,7 +245,14 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public boolean removeChildren(String childName) {
         if (this.children != null) {
-            return this.children.removeIf(child -> child.getName().equalsIgnoreCase(childName));
+            List<ClausewitzItem> list = this.mapChildren.get(childName);
+
+            if (list == null) {
+                return false;
+            } else {
+                list.forEach(this.children::remove);
+                internalClean();
+            }
         }
 
         return false;
@@ -182,11 +261,23 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public void removeAllChildren() {
         if (this.children != null) {
             this.children.clear();
+            this.mapChildren.clear();
+            internalClean();
         }
     }
 
     public boolean removeChildIf(Predicate<ClausewitzItem> filter) {
-        return this.children.removeIf(filter);
+        if (this.children != null) {
+            boolean removed = this.children.removeIf(filter);
+
+            if (removed) {
+                this.mapChildren.values().forEach(list -> list.removeIf(filter));
+                internalClean();
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void addVariable(ClausewitzVariable variable) {
@@ -646,8 +737,11 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList changeChildToList(int childOrder, String listName, boolean sameLine, String... values) {
         if (this.children != null) {
             for (int i = 0; i < this.children.size(); i++) {
-                if (childOrder == this.children.get(i).order) {
-                    this.children.remove(i);
+                ClausewitzItem item;
+                if (childOrder == (item = this.children.get(i)).order) {
+                    this.children.remove(item);
+                    this.mapChildren.get(item.name).remove(item);
+                    internalClean();
                     break;
                 }
             }
@@ -730,11 +824,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public Optional<ClausewitzItem> getChild(String childName) {
         if (this.children != null) {
-            for (ClausewitzItem child : this.children) {
-                if (child.getName().equalsIgnoreCase(childName)) {
-                    return Optional.of(child);
-                }
-            }
+            return Optional.ofNullable(this.mapChildren.get(childName)).map(l -> l.get(0));
         }
 
         return Optional.empty();
@@ -746,16 +836,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public Optional<ClausewitzItem> getChild(String childName, int index) {
         if (this.children != null) {
-            int j = 0;
-            for (ClausewitzItem child : this.children) {
-                if (child.getName().equalsIgnoreCase(childName)) {
-                    if (j == index) {
-                        return Optional.of(child);
-                    }
-
-                    j++;
-                }
-            }
+            return Optional.ofNullable(this.mapChildren.get(childName)).map(l -> l.get(index));
         }
 
         return Optional.empty();
@@ -763,37 +844,27 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public Optional<ClausewitzItem> getLastChild(String childName) {
         if (this.children != null) {
-            for (int i = this.children.size() - 1; i >= 0; i--) {
-                if (this.children.get(i).getName().equalsIgnoreCase(childName)) {
-                    return Optional.ofNullable(this.children.get(i));
-                }
-            }
+            return Optional.ofNullable(this.mapChildren.get(childName)).map(l -> l.get(l.size() - 1));
         }
 
         return Optional.empty();
     }
 
     public List<ClausewitzItem> getChildren(String name) {
-        List<ClausewitzItem> list = new ArrayList<>();
-
         if (this.children != null) {
-            for (ClausewitzItem child : this.children) {
-                if (child.getName().equalsIgnoreCase(name)) {
-                    list.add(child);
-                }
-            }
+            return Optional.ofNullable(this.mapChildren.get(name)).map(ArrayList::new).orElse(new ArrayList<>());
         }
 
-        return list;
+        return new ArrayList<>();
     }
 
     public List<ClausewitzItem> getChildrenNot(String name) {
         List<ClausewitzItem> list = new ArrayList<>();
 
         if (this.children != null) {
-            for (ClausewitzItem child : this.children) {
-                if (!child.getName().equalsIgnoreCase(name)) {
-                    list.add(child);
+            for (Map.Entry<String, List<ClausewitzItem>> entry : this.mapChildren.entrySet()) {
+                if (!entry.getKey().equals(name)) {
+                    list.addAll(entry.getValue());
                 }
             }
         }
@@ -802,12 +873,13 @@ public final class ClausewitzItem extends ClausewitzPObject {
     }
 
     public List<ClausewitzItem> getChildrenNot(String... names) {
+        Set<String> not = Set.of(names);
         List<ClausewitzItem> list = new ArrayList<>();
 
         if (this.children != null) {
-            for (ClausewitzItem child : this.children) {
-                if (Arrays.stream(names).noneMatch(child.getName()::equalsIgnoreCase)) {
-                    list.add(child);
+            for (Map.Entry<String, List<ClausewitzItem>> entry : this.mapChildren.entrySet()) {
+                if (!not.contains(entry.getKey())) {
+                    list.addAll(entry.getValue());
                 }
             }
         }
@@ -819,9 +891,9 @@ public final class ClausewitzItem extends ClausewitzPObject {
         List<ClausewitzItem> list = new ArrayList<>();
 
         if (this.children != null) {
-            for (ClausewitzItem child : this.children) {
-                if (child.getName().startsWith(name)) {
-                    list.add(child);
+            for (Map.Entry<String, List<ClausewitzItem>> entry : this.mapChildren.entrySet()) {
+                if (entry.getKey().startsWith(name)) {
+                    list.addAll(entry.getValue());
                 }
             }
         }
@@ -1144,25 +1216,25 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public boolean removeByOrder(int order) {
         if (this.lists != null) {
-            for (int i = 0; i < this.lists.size(); i++) {
-                if (this.lists.get(i).getOrder() == order) {
-                    return this.lists.remove(i) != null;
+            for (ClausewitzList list : this.lists) {
+                if (list.order == order) {
+                    return this.lists.remove(list);
                 }
             }
         }
 
         if (this.variables != null) {
-            for (int i = 0; i < this.variables.size(); i++) {
-                if (this.variables.get(i).getOrder() == order) {
-                    return this.variables.remove(i) != null;
+            for (ClausewitzVariable variable : this.variables) {
+                if (variable.order == order) {
+                    return this.variables.remove(variable);
                 }
             }
         }
 
         if (this.children != null) {
-            for (int i = 0; i < this.children.size(); i++) {
-                if (this.children.get(i).getOrder() == order) {
-                    return this.children.remove(i) != null;
+            for (ClausewitzItem child : this.children) {
+                if (child.order == order) {
+                    return internalRemoveChild(child);
                 }
             }
         }
@@ -1171,40 +1243,46 @@ public final class ClausewitzItem extends ClausewitzPObject {
     }
 
     public boolean isEmpty() {
-        return (this.variables == null || this.variables.isEmpty()) && (this.lists == null || this.lists.isEmpty()) && (this.children == null
-                                                                                                                        || this.children.isEmpty());
+        return (this.variables == null || this.variables.isEmpty()) && (this.lists == null || this.lists.isEmpty()) && this.children == null;
     }
 
     public List<ClausewitzList> getEmptyLists() {
-        return Stream.concat(getLists().stream().filter(ClausewitzList::isEmpty), getChildren().stream()
-                                                                                               .map(ClausewitzItem::getEmptyLists)
-                                                                                               .flatMap(Collection::stream)).collect(Collectors.toList());
+        return Stream.concat(getLists().stream().filter(ClausewitzList::isEmpty),
+                             getChildren().stream()
+                                          .map(ClausewitzItem::getEmptyLists)
+                                          .flatMap(Collection::stream))
+                     .collect(Collectors.toList());
     }
 
     public List<ClausewitzList> getListsSize(int size) {
-        return Stream.concat(getLists().stream().filter(list -> list.size() == size), getChildren().stream()
-                                                                                                   .map(item -> item.getListsSize(size))
-                                                                                                   .flatMap(Collection::stream)).collect(Collectors.toList());
+        return Stream.concat(getLists().stream().filter(list -> list.size() == size),
+                             getChildren().stream()
+                                          .map(item -> item.getListsSize(size))
+                                          .flatMap(Collection::stream))
+                     .collect(Collectors.toList());
     }
 
     public List<ClausewitzItem> getChildrenSize(int size) {
-        return Stream.concat(getChildren().stream().filter(item -> item.getNbObjects() == size), getChildren().stream()
-                                                                                                              .map(item -> item.getChildrenSize(size))
-                                                                                                              .flatMap(Collection::stream))
+        return Stream.concat(getChildren().stream().filter(item -> item.getNbObjects() == size),
+                             getChildren().stream()
+                                          .map(item -> item.getChildrenSize(size))
+                                          .flatMap(Collection::stream))
                      .collect(Collectors.toList());
     }
 
     public List<ClausewitzVariable> getBlankVariable() {
-        return Stream.concat(getVariables().stream().filter(variable -> ClausewitzUtils.isBlank(variable.getValue())), getChildren().stream()
-                                                                                                                                    .map(ClausewitzItem::getBlankVariable)
-                                                                                                                                    .flatMap(Collection::stream))
+        return Stream.concat(getVariables().stream().filter(variable -> ClausewitzUtils.isBlank(variable.getValue())),
+                             getChildren().stream()
+                                          .map(ClausewitzItem::getBlankVariable)
+                                          .flatMap(Collection::stream))
                      .collect(Collectors.toList());
     }
 
     public List<ClausewitzVariable> getBlankNameVariable() {
-        return Stream.concat(getVariables().stream().filter(variable -> ClausewitzUtils.isBlank(variable.getName())), getChildren().stream()
-                                                                                                                                   .map(ClausewitzItem::getBlankNameVariable)
-                                                                                                                                   .flatMap(Collection::stream))
+        return Stream.concat(getVariables().stream().filter(variable -> ClausewitzUtils.isBlank(variable.getName())),
+                             getChildren().stream()
+                                          .map(ClausewitzItem::getBlankNameVariable)
+                                          .flatMap(Collection::stream))
                      .collect(Collectors.toList());
     }
 
@@ -1224,7 +1302,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     @Override
     public int hashCode() {
-        return Objects.hash(children, variables, lists, sameLine);
+        return Objects.hash(name, children, variables, lists, sameLine);
     }
 
     @Override
@@ -1247,7 +1325,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
             bufferedWriter.newLine();
 
-            if (this.sameLine && getInternalChildren().isEmpty()) {
+            if (this.sameLine && this.children == null) {
                 ClausewitzUtils.printTabs(bufferedWriter, depth + 1);
 
                 for (ClausewitzObject object : getAllOrdered()) {
