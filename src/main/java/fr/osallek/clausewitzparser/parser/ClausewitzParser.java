@@ -6,9 +6,6 @@ import fr.osallek.clausewitzparser.model.BinaryToken;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,6 +30,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClausewitzParser {
 
@@ -47,8 +46,7 @@ public class ClausewitzParser {
 
     public static ClausewitzItem parse(File file, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) {
         try {
-            return parse(file, skip, listeners,
-                         Charset.forName(new CharsetDetector().setText(new BufferedInputStream(new FileInputStream(file))).detect().getName()));
+            return parse(file, skip, listeners, CharsetDetector.detect(new BufferedInputStream(new FileInputStream(file))));
         } catch (IOException | ClausewitzParseException ignored) {
             try {
                 return parse(file, skip, listeners, StandardCharsets.ISO_8859_1);
@@ -114,8 +112,7 @@ public class ClausewitzParser {
             throw new NullPointerException("No entry");
         }
 
-        try (InputStream stream = zipFile.getInputStream(zipEntry);
-             InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
+        try (InputStream stream = zipFile.getInputStream(zipEntry); InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
              BufferedReader reader = new BufferedReader(inputStreamReader)) {
             root = parse(reader, skip, listeners);
         } catch (IOException e) {
@@ -227,8 +224,7 @@ public class ClausewitzParser {
             throw new NullPointerException("No entry");
         }
 
-        try (InputStream stream = zipFile.getInputStream(zipEntry);
-             InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
+        try (InputStream stream = zipFile.getInputStream(zipEntry); InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
              BufferedReader reader = new BufferedReader(inputStreamReader)) {
             readSingleObject(reader, skip, root, objectName);
         } catch (IOException e) {
@@ -551,7 +547,7 @@ public class ClausewitzParser {
         char[] bytes = new char[8];
         reader.read(bytes);
 
-        return ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getInt() / 65536d * 2;
+        return ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getInt() / 65_536d * 2;
     }
 
     private static String readBinaryUnsignedLong(BufferedReader reader, Charset charset) throws IOException {
@@ -565,6 +561,6 @@ public class ClausewitzParser {
         char[] bytes = new char[22];
         reader.read(bytes);
 
-        return new String(bytes); //Fix me not sure what to do
+        return new String(bytes); //Fixme not sure what to do
     }
 }
