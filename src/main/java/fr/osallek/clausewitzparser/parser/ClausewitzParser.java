@@ -137,7 +137,7 @@ public class ClausewitzParser {
         return root;
     }
 
-    public static ClausewitzObject readSingleObject(File file, int skip, String objectName) {
+    public static Optional<ClausewitzObject> readSingleObject(File file, int skip, String objectName) {
         try {
             return readSingleObject(file, skip, objectName, StandardCharsets.ISO_8859_1);
         } catch (ClausewitzParseException e) {
@@ -149,7 +149,7 @@ public class ClausewitzParser {
         }
     }
 
-    public static ClausewitzObject readSingleObject(File file, int skip, String objectName, Charset charset) {
+    public static Optional<ClausewitzObject> readSingleObject(File file, int skip, String objectName, Charset charset) {
         if (objectName == null) {
             throw new NullPointerException("objectName is null");
         }
@@ -165,7 +165,7 @@ public class ClausewitzParser {
             throw new ClausewitzParseException(e);
         }
 
-        return root.isEmpty() ? null : root.getAllOrdered().get(0);
+        return Optional.of(root).filter(Predicate.not(ClausewitzItem::isEmpty)).map(item -> item.getAllOrdered().get(0));
     }
 
     public static ClausewitzObject readSingleObjectBinary(ZipFile zipFile, String entryName, int skip, String objectName, Charset charset,
@@ -323,15 +323,15 @@ public class ClausewitzParser {
 
             if ('}' == letter) {
                 if (!strings.isEmpty()) {
-                    ClausewitzItem previousItem = currentNode.getParent().getLastChild(currentNode.getName());
+                    Optional<ClausewitzItem> previousItem = currentNode.getParent().getLastChild(currentNode.getName());
 
-                    if (previousItem != null) {
-                        if (previousItem.getAllOrdered().isEmpty()) {
+                    if (previousItem.isPresent()) {
+                        if (previousItem.get().getAllOrdered().isEmpty()) {
                             currentNode = currentNode.getParent()
-                                                     .changeChildToList(previousItem.getOrder(), currentNode.getName(),
+                                                     .changeChildToList(previousItem.get().getOrder(), currentNode.getName(),
                                                                         strings.size() > 1 && nbNewLine <= 2, strings);
                         } else {
-                            previousItem.addList("", strings.size() > 1 && nbNewLine <= previousItem.getNbObjects() * 2 + 2, false, strings);
+                            previousItem.get().addList("", strings.size() > 1 && nbNewLine <= previousItem.get().getNbObjects() * 2 + 2, false, strings);
                         }
                     } else {
                         currentNode = currentNode.getParent().addList(currentNode.getName(), strings.size() > 1 && nbNewLine <= 2, strings);
@@ -449,14 +449,14 @@ public class ClausewitzParser {
                     }
                     case END -> {
                         if (!strings.isEmpty()) {
-                            ClausewitzItem previousItem = currentNode.getParent().getLastChild(currentNode.getName());
+                            Optional<ClausewitzItem> previousItem = currentNode.getParent().getLastChild(currentNode.getName());
 
-                            if (previousItem != null) {
-                                if (previousItem.getAllOrdered().isEmpty()) {
-                                    currentNode = currentNode.getParent()
-                                                             .changeChildToList(previousItem.getOrder(), currentNode.getName(), strings.size() > 1, strings);
+                            if (previousItem.isPresent()) {
+                                if (previousItem.get().getAllOrdered().isEmpty()) {
+                                    currentNode = currentNode.getParent().changeChildToList(previousItem.get().getOrder(), currentNode.getName(),
+                                                                                            strings.size() > 1, strings);
                                 } else {
-                                    previousItem.addList("", strings.size() > 1, false, strings);
+                                    previousItem.get().addList("", strings.size() > 1, false, strings);
                                 }
                             } else {
                                 currentNode = currentNode.getParent().addList(currentNode.getName(), strings.size() > 1, strings);

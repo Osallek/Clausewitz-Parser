@@ -4,11 +4,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,7 +14,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Optional;
 import java.util.zip.ZipFile;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 class ClausewitzParserTest {
 
@@ -43,33 +43,33 @@ class ClausewitzParserTest {
 
         Assertions.assertNotNull(root);
 
-        Assertions.assertEquals("\"d647a13792fa0c47440b944406d7edef\"", root.getVarAsString("checksum"));
+        Assertions.assertEquals(Optional.of("\"d647a13792fa0c47440b944406d7edef\""), root.getVarAsString("checksum"));
 
-        ClausewitzList list = root.getList("mod_enabled");
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertTrue(list.contains("\"mod/anbennar_idea_every_tech.mod\""));
-        Assertions.assertFalse(list.contains("\"mod/random_mod_name\""));
+        Optional<ClausewitzList> list = root.getList("mod_enabled");
+        Assertions.assertTrue(list.isPresent());
+        Assertions.assertEquals(3, list.get().size());
+        Assertions.assertTrue(list.get().contains("\"mod/anbennar_idea_every_tech.mod\""));
+        Assertions.assertFalse(list.get().contains("\"mod/random_mod_name\""));
 
-        ClausewitzItem child = root.getChild("teams");
-        Assertions.assertNotNull(child);
-        Assertions.assertFalse(child.isEmpty());
+        Optional<ClausewitzItem> child = root.getChild("teams");
+        Assertions.assertTrue(child.isPresent());
+        Assertions.assertFalse(child.get().isEmpty());
 
-        ClausewitzItem grandChild = child.getChild("team");
-        Assertions.assertNotNull(grandChild);
-        Assertions.assertFalse(grandChild.isEmpty());
-        Assertions.assertEquals("\"La thune\"", grandChild.getVarAsString("name"));
+        Optional<ClausewitzItem> grandChild = child.get().getChild("team");
+        Assertions.assertTrue(grandChild.isPresent());
+        Assertions.assertFalse(grandChild.get().isEmpty());
+        Assertions.assertEquals(Optional.of("\"La thune\""), grandChild.get().getVarAsString("name"));
 
         child = root.getChild("countries");
-        Assertions.assertNotNull(child);
-        Assertions.assertFalse(child.isEmpty());
+        Assertions.assertTrue(child.isPresent());
+        Assertions.assertFalse(child.get().isEmpty());
 
-        grandChild = child.getChild("A85");
-        Assertions.assertNotNull(grandChild);
-        Assertions.assertFalse(grandChild.isEmpty());
-        Assertions.assertEquals(true, grandChild.getVarAsBool("human"));
-        Assertions.assertEquals("\"magisterium\"", grandChild.getVarAsString("government_name"));
-        Assertions.assertEquals(LocalDate.of(1444, 11, 11), grandChild.getVarAsDate("last_focus_move"));
+        grandChild = child.get().getChild("A85");
+        Assertions.assertTrue(grandChild.isPresent());
+        Assertions.assertFalse(grandChild.get().isEmpty());
+        Assertions.assertEquals(Optional.of(true), grandChild.get().getVarAsBool("human"));
+        Assertions.assertEquals(Optional.of("\"magisterium\""), grandChild.get().getVarAsString("government_name"));
+        Assertions.assertEquals(Optional.of(LocalDate.of(1444, 11, 11)), grandChild.get().getVarAsDate("last_focus_move"));
     }
 
     @Test
@@ -81,39 +81,39 @@ class ClausewitzParserTest {
 
             Assertions.assertNotNull(root);
 
-            Assertions.assertEquals("\"7c8a83d3b91c2349764d14fb48cb1e23\"", root.getVarAsString("checksum"));
+            Assertions.assertEquals(Optional.of("\"7c8a83d3b91c2349764d14fb48cb1e23\""), root.getVarAsString("checksum"));
 
-            ClausewitzItem child = root.getChild("teams");
-            Assertions.assertNotNull(child);
-            Assertions.assertFalse(child.isEmpty());
+            Optional<ClausewitzItem> child = root.getChild("teams");
+            Assertions.assertTrue(child.isPresent());
+            Assertions.assertFalse(child.get().isEmpty());
 
-            ClausewitzItem grandChild = child.getChild("team");
-            Assertions.assertNotNull(grandChild);
-            Assertions.assertFalse(grandChild.isEmpty());
-            Assertions.assertEquals("\"La thune\"", grandChild.getVarAsString("name"));
+            Optional<ClausewitzItem> grandChild = child.get().getChild("team");
+            Assertions.assertTrue(grandChild.isPresent());
+            Assertions.assertFalse(grandChild.get().isEmpty());
+            Assertions.assertEquals(Optional.of("\"La thune\""), grandChild.get().getVarAsString("name"));
 
             child = root.getChild("countries");
-            Assertions.assertNotNull(child);
-            Assertions.assertFalse(child.isEmpty());
+            Assertions.assertTrue(child.isPresent());
+            Assertions.assertFalse(child.get().isEmpty());
 
-            grandChild = child.getChild("A85");
-            Assertions.assertNotNull(grandChild);
-            Assertions.assertFalse(grandChild.isEmpty());
-            Assertions.assertEquals(true, grandChild.getVarAsBool("human"));
-            Assertions.assertEquals("\"magisterium\"", grandChild.getVarAsString("government_name"));
-            Assertions.assertEquals(LocalDate.of(1444, 11, 11), grandChild.getVarAsDate("last_focus_move"));
+            grandChild = child.get().getChild("A85");
+            Assertions.assertTrue(grandChild.isPresent());
+            Assertions.assertFalse(grandChild.get().isEmpty());
+            Assertions.assertEquals(Optional.of(true), grandChild.get().getVarAsBool("human"));
+            Assertions.assertEquals(Optional.of("\"magisterium\""), grandChild.get().getVarAsString("government_name"));
+            Assertions.assertEquals(Optional.of(LocalDate.of(1444, 11, 11)), grandChild.get().getVarAsDate("last_focus_move"));
         }
     }
 
     @Test
     void testReadFlatSingleObject() {
         Configurator.setLevel(ClausewitzParser.class.getCanonicalName(), Level.DEBUG);
-        ClausewitzObject root = ClausewitzParser.readSingleObject(RESOURCE_FOLDER.resolve("1_30_4_flat.eu4").toFile(), 1, "mod_enabled={");
+        Optional<ClausewitzObject> root = ClausewitzParser.readSingleObject(RESOURCE_FOLDER.resolve("1_30_4_flat.eu4").toFile(), 1, "mod_enabled={");
 
-        Assertions.assertNotNull(root);
-        Assertions.assertEquals(ClausewitzList.class, root.getClass());
+        Assertions.assertTrue(root.isPresent());
+        Assertions.assertEquals(ClausewitzList.class, root.get().getClass());
 
-        ClausewitzList list = (ClausewitzList) root;
+        ClausewitzList list = (ClausewitzList) root.get();
         Assertions.assertNotNull(list);
         Assertions.assertEquals(3, list.size());
         Assertions.assertTrue(list.contains("\"mod/anbennar_idea_every_tech.mod\""));
@@ -145,29 +145,29 @@ class ClausewitzParserTest {
 
         Assertions.assertNotNull(root);
 
-        ClausewitzList list = root.getList("western_mediterrenean_area");
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(13, list.size());
-        Assertions.assertTrue(list.contains("1293"));
-        Assertions.assertFalse(list.contains("1321"));
+        Optional<ClausewitzList> list = root.getList("western_mediterrenean_area");
+        Assertions.assertTrue(list.isPresent());
+        Assertions.assertEquals(13, list.get().size());
+        Assertions.assertTrue(list.get().contains("1293"));
+        Assertions.assertFalse(list.get().contains("1321"));
 
-        ClausewitzItem child = root.getChild("luxemburg_liege_area");
-        Assertions.assertNotNull(child);
-        Assertions.assertTrue(child.isEmpty());
+        Optional<ClausewitzItem> child = root.getChild("luxemburg_liege_area");
+        Assertions.assertTrue(child.isPresent());
+        Assertions.assertTrue(child.get().isEmpty());
 
         child = root.getChild("brittany_area");
-        Assertions.assertNotNull(child);
-        Assertions.assertFalse(child.isEmpty());
+        Assertions.assertTrue(child.isPresent());
+        Assertions.assertFalse(child.get().isEmpty());
 
-        list = child.getList("color");
-        Assertions.assertNotNull(list);
-        Assertions.assertTrue(list.contains("118"));
-        Assertions.assertFalse(list.contains("1321"));
+        list = child.get().getList("color");
+        Assertions.assertTrue(list.isPresent());
+        Assertions.assertTrue(list.get().contains("118"));
+        Assertions.assertFalse(list.get().contains("1321"));
 
-        list = child.getList("");
-        Assertions.assertNotNull(list);
-        Assertions.assertTrue(list.contains("171"));
-        Assertions.assertFalse(list.contains("1321"));
+        list = child.get().getList("");
+        Assertions.assertTrue(list.isPresent());
+        Assertions.assertTrue(list.get().contains("171"));
+        Assertions.assertFalse(list.get().contains("1321"));
     }
 
     @Test
@@ -177,25 +177,25 @@ class ClausewitzParserTest {
 
         Assertions.assertNotNull(root);
 
-        ClausewitzItem child = root.getChild("france_region");
-        Assertions.assertNotNull(child);
-        Assertions.assertFalse(child.isEmpty());
+        Optional<ClausewitzItem> child = root.getChild("france_region");
+        Assertions.assertTrue(child.isPresent());
+        Assertions.assertFalse(child.get().isEmpty());
 
-        ClausewitzList list = child.getList("areas");
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(17, list.size());
-        Assertions.assertTrue(list.contains("savoy_dauphine_area"));
-        Assertions.assertFalse(list.contains("eastern_norway"));
+        Optional<ClausewitzList> list = child.get().getList("areas");
+        Assertions.assertTrue(list.isPresent());
+        Assertions.assertEquals(17, list.get().size());
+        Assertions.assertTrue(list.get().contains("savoy_dauphine_area"));
+        Assertions.assertFalse(list.get().contains("eastern_norway"));
 
         child = root.getChild("niger_region");
-        Assertions.assertNotNull(child);
-        Assertions.assertFalse(child.isEmpty());
+        Assertions.assertTrue(child.isPresent());
+        Assertions.assertFalse(child.get().isEmpty());
 
-        list = child.getList("monsoon");
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-        Assertions.assertTrue(list.contains("00.06.01"));
-        Assertions.assertFalse(list.contains("00.00.01"));
+        list = child.get().getList("monsoon");
+        Assertions.assertTrue(list.isPresent());
+        Assertions.assertEquals(2, list.get().size());
+        Assertions.assertTrue(list.get().contains("00.06.01"));
+        Assertions.assertFalse(list.get().contains("00.00.01"));
     }
 
     @Test
@@ -206,19 +206,19 @@ class ClausewitzParserTest {
         Assertions.assertNotNull(root);
         Assertions.assertEquals(257, root.getNbObjects());
 
-        ClausewitzItem child = root.getChild("tropical");
-        Assertions.assertNotNull(child);
-        Assertions.assertEquals(5, child.getNbObjects());
-        Assertions.assertNotNull(child.getVar("picture"));
-        Assertions.assertEquals("\"climate_tropical\"", child.getVarAsString("picture"));
-        Assertions.assertEquals(0.1, child.getVarAsDouble("local_development_cost"));
-        Assertions.assertEquals(-0.3, child.getVarAsDouble("supply_limit_modifier"));
-        Assertions.assertEquals(-10, child.getVarAsInt("local_colonial_growth"));
+        Optional<ClausewitzItem> child = root.getChild("tropical");
+        Assertions.assertTrue(child.isPresent());
+        Assertions.assertEquals(5, child.get().getNbObjects());
+        Assertions.assertTrue(child.get().hasVar("picture"));
+        Assertions.assertEquals(Optional.of("\"climate_tropical\""), child.get().getVarAsString("picture"));
+        Assertions.assertEquals(Optional.of(0.1), child.get().getVarAsDouble("local_development_cost"));
+        Assertions.assertEquals(Optional.of(-0.3), child.get().getVarAsDouble("supply_limit_modifier"));
+        Assertions.assertEquals(Optional.of(-10), child.get().getVarAsInt("local_colonial_growth"));
 
         child = root.getChild("hanafi_scholar_modifier");
-        Assertions.assertNotNull(child);
-        Assertions.assertEquals(5, child.getNbObjects());
-        Assertions.assertEquals("\"RELIGIOUS_SCHOLAR_EXPIRY\"", child.getVarAsString("expire_message_type"));
-        Assertions.assertEquals(true, child.getVarAsBool("religion"));
+        Assertions.assertTrue(child.isPresent());
+        Assertions.assertEquals(5, child.get().getNbObjects());
+        Assertions.assertEquals(Optional.of("\"RELIGIOUS_SCHOLAR_EXPIRY\""), child.get().getVarAsString("expire_message_type"));
+        Assertions.assertEquals(Optional.of(true), child.get().getVarAsBool("religion"));
     }
 }

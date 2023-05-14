@@ -1,7 +1,6 @@
 package fr.osallek.clausewitzparser.model;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.time.DateTimeException;
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -61,56 +61,34 @@ public final class ClausewitzList extends ClausewitzPObject {
         return this.values;
     }
 
-    public String get(int id) {
+    public Optional<String> get(int id) {
         if (id < 0 || this.values == null || id >= this.values.size()) {
-            return null;
+            return Optional.empty();
         }
 
-        return this.values.get(id);
+        return Optional.ofNullable(this.values.get(id));
     }
 
-    public Integer getAsInt(int id) {
-        String s = get(id);
-
-        if (ClausewitzUtils.isNotBlank(s)) {
-            return Integer.parseInt(s);
-        } else {
-            return null;
-        }
+    public Optional<Integer> getAsInt(int id) {
+        return get(id).filter(ClausewitzUtils::isNotBlank).map(Integer::parseInt);
     }
 
-    public Double getAsDouble(int id) {
-        String s = get(id);
-
-        if (ClausewitzUtils.isNotBlank(s)) {
-            return Double.parseDouble(s);
-        } else {
-            return null;
-        }
+    public Optional<Double> getAsDouble(int id) {
+        return get(id).filter(ClausewitzUtils::isNotBlank).map(Double::parseDouble);
     }
 
-    public Boolean getAsBool(int id) {
-        String s = get(id);
-
-        if (ClausewitzUtils.isNotBlank(s)) {
-            return "yes".equals(s);
-        } else {
-            return null;
-        }
+    public Optional<Boolean> getAsBool(int id) {
+        return get(id).filter(ClausewitzUtils::isNotBlank).map("yes"::equals);
     }
 
-    public LocalDate getAsDate(int id) {
-        String s = get(id);
-
-        if (ClausewitzUtils.isNotBlank(s)) {
+    public Optional<LocalDate> getAsDate(int id) {
+        return get(id).filter(ClausewitzUtils::isNotBlank).map(s -> {
             try {
-                return ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(s));
+                return ClausewitzUtils.stringToDate(s);
             } catch (DateTimeException e) {
                 return null;
             }
-        } else {
-            return null;
-        }
+        });
     }
 
     public int size() {
