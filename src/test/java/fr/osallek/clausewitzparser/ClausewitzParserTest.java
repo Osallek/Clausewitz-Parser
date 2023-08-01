@@ -4,6 +4,11 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,10 +21,6 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 import java.util.zip.ZipFile;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 class ClausewitzParserTest {
 
@@ -125,12 +126,12 @@ class ClausewitzParserTest {
         Configurator.setLevel(ClausewitzParser.class.getCanonicalName(), Level.DEBUG);
 
         try (ZipFile zipFile = new ZipFile(RESOURCE_FOLDER.resolve("1_30_4_compressed.eu4").toFile())) {
-            ClausewitzObject root = ClausewitzParser.readSingleObject(zipFile, "meta", 1, "mod_enabled={");
+            Optional<ClausewitzObject> root = ClausewitzParser.readSingleObject(zipFile, "meta", 1, "mod_enabled={");
 
-            Assertions.assertNotNull(root);
-            Assertions.assertEquals(ClausewitzList.class, root.getClass());
+            Assertions.assertTrue(root.isPresent());
+            Assertions.assertEquals(ClausewitzList.class, root.get().getClass());
 
-            ClausewitzList list = (ClausewitzList) root;
+            ClausewitzList list = (ClausewitzList) root.get();
             Assertions.assertNotNull(list);
             Assertions.assertEquals(3, list.size());
             Assertions.assertTrue(list.contains("\"mod/anbennar_idea_every_tech.mod\""));

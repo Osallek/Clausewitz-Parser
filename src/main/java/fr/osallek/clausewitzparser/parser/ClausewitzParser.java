@@ -6,6 +6,9 @@ import fr.osallek.clausewitzparser.model.BinaryToken;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,8 +33,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ClausewitzParser {
 
@@ -168,8 +169,8 @@ public class ClausewitzParser {
         return Optional.of(root).filter(Predicate.not(ClausewitzItem::isEmpty)).map(item -> item.getAllOrdered().get(0));
     }
 
-    public static ClausewitzObject readSingleObjectBinary(ZipFile zipFile, String entryName, int skip, String objectName, Charset charset,
-                                                          Map<Integer, String> tokens) {
+    public static Optional<ClausewitzObject> readSingleObjectBinary(ZipFile zipFile, String entryName, int skip, String objectName, Charset charset,
+                                                                    Map<Integer, String> tokens) {
         if (objectName == null) {
             throw new NullPointerException("objectName is null");
         }
@@ -186,7 +187,7 @@ public class ClausewitzParser {
         try (InputStream stream = zipFile.getInputStream(zipEntry);
              InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
              BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            return convertBinary(reader, charset, skip, tokens, objectName, new HashMap<>());
+            return Optional.of(convertBinary(reader, charset, skip, tokens, objectName, new HashMap<>()));
         } catch (CharacterCodingException e) {
             throw new ClausewitzParseException(e);
         } catch (IOException e) {
@@ -195,7 +196,7 @@ public class ClausewitzParser {
         }
     }
 
-    public static ClausewitzObject readSingleObject(ZipFile zipFile, String entryName, int skip, String objectName) {
+    public static Optional<ClausewitzObject> readSingleObject(ZipFile zipFile, String entryName, int skip, String objectName) {
         try {
             return readSingleObject(zipFile, entryName, skip, objectName, StandardCharsets.ISO_8859_1);
         } catch (ClausewitzParseException e) {
@@ -207,7 +208,7 @@ public class ClausewitzParser {
         }
     }
 
-    private static ClausewitzObject readSingleObject(ZipFile zipFile, String entryName, int skip, String objectName, Charset charset) {
+    private static Optional<ClausewitzObject> readSingleObject(ZipFile zipFile, String entryName, int skip, String objectName, Charset charset) {
         if (objectName == null) {
             throw new NullPointerException("objectName is null");
         }
@@ -231,7 +232,7 @@ public class ClausewitzParser {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
         }
 
-        return root.isEmpty() ? null : root.getAllOrdered().get(0);
+        return Optional.of(root).filter(Predicate.not(ClausewitzItem::isEmpty)).map(item -> item.getAllOrdered().get(0));
     }
 
     private static void readSingleObject(BufferedReader reader, int skip, ClausewitzItem root, String objectName) throws IOException {
