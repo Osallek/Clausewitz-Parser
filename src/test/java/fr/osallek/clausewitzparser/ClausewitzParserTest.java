@@ -3,6 +3,7 @@ package fr.osallek.clausewitzparser;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -220,5 +221,19 @@ class ClausewitzParserTest {
         Assertions.assertEquals(5, child.getNbObjects());
         Assertions.assertEquals("\"RELIGIOUS_SCHOLAR_EXPIRY\"", child.getVarAsString("expire_message_type"));
         Assertions.assertEquals(true, child.getVarAsBool("religion"));
+    }
+
+    @Test
+    void testParseCountriesFile() {
+        Configurator.setLevel(ClausewitzParser.class.getCanonicalName(), Level.DEBUG);
+        ClausewitzItem root = ClausewitzParser.parse(RESOURCE_FOLDER.resolve("00_countries.txt").toFile(), 0);
+
+        Assertions.assertNotNull(root);
+        Assertions.assertEquals(282, root.getNbVariables());
+
+        ClausewitzVariable variable = root.getVar(279);
+        Assertions.assertNotNull(variable);
+        Assertions.assertEquals("HAH", variable.getName());
+        Assertions.assertEquals("countries/Hashshashin.txt", variable.getValue());
     }
 }

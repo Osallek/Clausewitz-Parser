@@ -56,7 +56,7 @@ final class ParserUtils {
                 break;
             }
 
-            if ('\'' == letter || '.' == letter || '_' == letter || '-' == letter || ':' == letter || Character.isLetterOrDigit(letter)) {
+            if ('\'' == letter || '/' == letter || '.' == letter || '_' == letter || '-' == letter || ':' == letter || Character.isLetterOrDigit(letter)) {
                 quotedString.append((char) letter);
                 reader.mark(1);
                 continue;
