@@ -199,7 +199,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
         }
 
         if (increaseOrders) {
-            this.getAllOrdered().stream().filter(co -> co.order >= variable.order).forEach(co -> co.order++);
+            getAllOrdered().stream().filter(co -> co.order >= variable.order).forEach(co -> co.order++);
         } else {
             variable.order = getNbObjects();
         }
@@ -779,9 +779,9 @@ public final class ClausewitzItem extends ClausewitzPObject {
     }
 
     public void removeAll() {
-        this.removeAllChildren();
-        this.removeAllVariables();
-        this.removeAllLists();
+        removeAllChildren();
+        removeAllVariables();
+        removeAllLists();
     }
 
     public int getNbChildren() {

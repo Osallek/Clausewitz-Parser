@@ -46,7 +46,8 @@ public final class ClausewitzUtils {
     }
 
     public static LocalDate stringToDate(String s) {
-        s = ClausewitzUtils.removeQuotes(s);
+        s = removeQuotes(s);
+
         if (DATE_PATTERN.matcher(s).matches()) {
             return LocalDate.parse(s, DATE_FORMAT);
         } else {
@@ -163,5 +164,4 @@ public final class ClausewitzUtils {
     public static void printSpace(BufferedWriter bufferedWriter) throws IOException {
         bufferedWriter.write(" ");
     }
-
 }

@@ -1,5 +1,7 @@
 package fr.osallek.clausewitzparser.parser;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -16,7 +18,7 @@ final class ParserUtils {
             quotedString.append((char) letter);
         }
 
-        return keepQuotes ? "\"" + quotedString.toString() + "\"" : quotedString.toString();
+        return keepQuotes ? ClausewitzUtils.addQuotes(quotedString.toString()) : quotedString.toString();
     }
 
     static String readString(BufferedReader reader, int firstChar) throws IOException {

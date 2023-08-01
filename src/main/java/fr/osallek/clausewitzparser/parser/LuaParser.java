@@ -1,9 +1,15 @@
 package fr.osallek.clausewitzparser.parser;
 
+import fr.osallek.clausewitzparser.common.ClausewitzParseException;
+import fr.osallek.clausewitzparser.ic4j.CharsetDetector;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
@@ -14,18 +20,24 @@ public final class LuaParser {
     private LuaParser() {}
 
     public static Map<String, Object> parse(File file) throws IOException {
-        return parse(file, false);
+        try {
+            return parse(file, CharsetDetector.detect(new BufferedInputStream(new FileInputStream(file))));
+        } catch (IOException | ClausewitzParseException ignored) {
+            try {
+                return parse(file, StandardCharsets.UTF_8);
+            } catch (ClausewitzParseException e) {
+                if (CharacterCodingException.class.equals(e.getCause().getClass())) {
+                    return parse(file, StandardCharsets.ISO_8859_1);
+                } else {
+                    throw e;
+                }
+            }
+        }
     }
 
-    public static Map<String, Object> parse(File file, boolean retryCharset) throws IOException {
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), retryCharset ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8)) {
+    public static Map<String, Object> parse(File file, Charset charset) throws IOException {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
             return parse(reader, new LinkedHashMap<>(), false);
-        } catch (CharacterCodingException e) {
-            if (!retryCharset) {
-                return parse(file, true);
-            } else {
-                throw e;
-            }
         }
     }
 
