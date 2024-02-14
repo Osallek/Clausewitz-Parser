@@ -10,18 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -65,8 +62,8 @@ public class ClausewitzParser {
         ClausewitzItem root;
         Instant start = Instant.now();
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
-            root = parse(reader, skip, listeners);
+        try {
+            root = parse(new CharArray(file, charset), skip, listeners);
         } catch (CharacterCodingException e) {
             throw new ClausewitzParseException(e);
         } catch (IOException e) {
@@ -113,9 +110,8 @@ public class ClausewitzParser {
             throw new NullPointerException("No entry");
         }
 
-        try (InputStream stream = zipFile.getInputStream(zipEntry); InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
-             BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            root = parse(reader, skip, listeners);
+        try (InputStream stream = zipFile.getInputStream(zipEntry)) {
+            root = parse(new CharArray(stream, charset), skip, listeners);
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
         }
@@ -127,9 +123,9 @@ public class ClausewitzParser {
         return root;
     }
 
-    private static ClausewitzItem parse(BufferedReader reader, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
+    private static ClausewitzItem parse(CharArray reader, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) {
         for (int i = 1; i <= skip; i++) {
-            reader.readLine();
+            reader.skipLine();
         }
 
         ClausewitzItem root = new ClausewitzItem();
@@ -157,8 +153,8 @@ public class ClausewitzParser {
 
         ClausewitzItem root = new ClausewitzItem();
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
-            readSingleObject(reader, skip, root, objectName);
+        try {
+            readSingleObject(new CharArray(file, charset), skip, root, objectName);
         } catch (CharacterCodingException e) {
             throw new ClausewitzParseException(e);
         } catch (IOException e) {
@@ -166,7 +162,7 @@ public class ClausewitzParser {
             throw new ClausewitzParseException(e);
         }
 
-        return root.isEmpty() ? null : root.getAllOrdered().get(0);
+        return root.isEmpty() ? null : root.getAllOrdered().getFirst();
     }
 
     public static ClausewitzObject readSingleObjectBinary(ZipFile zipFile, String entryName, int skip, String objectName, Charset charset,
@@ -184,10 +180,8 @@ public class ClausewitzParser {
             throw new NullPointerException("zipFile null");
         }
 
-        try (InputStream stream = zipFile.getInputStream(zipEntry);
-             InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
-             BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            return convertBinary(reader, charset, skip, tokens, objectName, new HashMap<>());
+        try (InputStream stream = zipFile.getInputStream(zipEntry);) {
+            return convertBinary(new CharArray(stream, charset), charset, skip, tokens, objectName, new HashMap<>());
         } catch (CharacterCodingException e) {
             throw new ClausewitzParseException(e);
         } catch (IOException e) {
@@ -225,31 +219,30 @@ public class ClausewitzParser {
             throw new NullPointerException("No entry");
         }
 
-        try (InputStream stream = zipFile.getInputStream(zipEntry); InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
-             BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            readSingleObject(reader, skip, root, objectName);
+        try (InputStream stream = zipFile.getInputStream(zipEntry);) {
+            readSingleObject(new CharArray(stream, charset), skip, root, objectName);
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
         }
 
-        return root.isEmpty() ? null : root.getAllOrdered().get(0);
+        return root.isEmpty() ? null : root.getAllOrdered().getFirst();
     }
 
-    private static void readSingleObject(BufferedReader reader, int skip, ClausewitzItem root, String objectName) throws IOException {
+    private static void readSingleObject(CharArray reader, int skip, ClausewitzItem root, String objectName) {
         for (int i = 1; i <= skip; i++) {
-            reader.readLine();
+            reader.skipLine();
         }
 
         String currentLine;
 
         while (true) {
-            reader.mark(10000); //Mark the current char to be able to return here afterward
+            int position = reader.position(); //Mark the current char to be able to return here afterward
             currentLine = reader.readLine();
 
             if (currentLine == null) {
                 return;
             } else if (currentLine.trim().startsWith(objectName)) {
-                reader.reset();
+                reader.position(position);
                 break;
             }
         }
@@ -257,8 +250,8 @@ public class ClausewitzParser {
         readObject(root, reader, new HashMap<>(), true);
     }
 
-    private static void readObject(ClausewitzPObject currentNode, BufferedReader reader, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners,
-                                   boolean readOnlyOneObject) throws IOException {
+    private static void readObject(ClausewitzPObject currentNode, CharArray reader,
+                                   Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners, boolean readOnlyOneObject) {
         if (currentNode == null) {
             throw new NullPointerException("node is null");
         }
@@ -268,8 +261,8 @@ public class ClausewitzParser {
         boolean isEquals = false;
         int nbNewLine = 0;
 
-        while ((letter = reader.read()) > -1) {
-            if (Character.isWhitespace(letter)) {
+        while ((letter = reader.read()) >= 0) {
+            if (letter == ' ' || letter == '\t' || letter == '\n' || letter == '\r') {
                 if ('\n' == letter) {
                     nbNewLine++;
                 }
@@ -278,18 +271,18 @@ public class ClausewitzParser {
             }
 
             if ('#' == letter) {
-                ParserUtils.readTillNext(reader, '#', true);
+                reader.skipTillNext('#', true);
                 continue;
             }
 
             if ('"' == letter) {
                 if (isEquals) {
-                    ((ClausewitzItem) currentNode).addVariable(strings.get(0), ParserUtils.readQuoted(reader, true));
+                    ((ClausewitzItem) currentNode).addVariable(strings.getFirst(), reader.readQuoted(true));
                     isEquals = false;
                     strings.clear();
                     continue;
                 } else {
-                    strings.add(ParserUtils.readQuoted(reader, true).trim());
+                    strings.add(reader.readQuoted(true).trim());
                     continue;
                 }
             }
@@ -300,19 +293,21 @@ public class ClausewitzParser {
             }
 
             if ('{' == letter) {
-                currentNode = new ClausewitzItem((ClausewitzItem) currentNode, strings.isEmpty() ? "" : strings.get(strings.size() - 1), 0, isEquals);
+                currentNode = new ClausewitzItem((ClausewitzItem) currentNode, strings.isEmpty() ? "" : strings.getLast(), 0, isEquals);
                 ClausewitzPObject finalCurrentNode = currentNode;
-                listeners.entrySet()
-                         .stream()
-                         .filter(entry -> entry.getKey().test(finalCurrentNode))
-                         .forEach(entry -> entry.getValue().accept(finalCurrentNode.getName()));
+                if (!listeners.isEmpty()) {
+                    listeners.entrySet()
+                             .stream()
+                             .filter(entry -> entry.getKey().test(finalCurrentNode))
+                             .forEach(entry -> entry.getValue().accept(finalCurrentNode.getName()));
+                }
                 readObject(currentNode, reader, listeners, false);
 
                 currentNode = currentNode.getParent();
                 isEquals = false;
 
                 if (!strings.isEmpty()) {
-                    strings.remove(strings.size() - 1);
+                    strings.removeLast();
                 }
 
                 if (readOnlyOneObject && (currentNode.getParent() == null)) { //Is root node and just read one object
@@ -349,12 +344,12 @@ public class ClausewitzParser {
 
             if (isEquals) { //Value
                 if (!strings.isEmpty()) {
-                    ((ClausewitzItem) currentNode).addVariable(strings.get(0), ParserUtils.readStringOrNumber(reader, letter).trim());
+                    ((ClausewitzItem) currentNode).addVariable(strings.getFirst(), reader.readStringOrNumber(letter).trim());
                 }
                 isEquals = false;
                 strings.clear();
             } else { //Key
-                strings.add(ParserUtils.readStringOrNumber(reader, letter).trim());
+                strings.add(reader.readStringOrNumber(letter).trim());
             }
         }
     }
@@ -368,19 +363,17 @@ public class ClausewitzParser {
             throw new NullPointerException("No entry");
         }
 
-        try (InputStream stream = zipFile.getInputStream(zipEntry);
-             InputStreamReader inputStreamReader = new InputStreamReader(stream, charset);
-             BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            return convertBinary(reader, charset, skip, tokens, null, listeners);
+        try (InputStream stream = zipFile.getInputStream(zipEntry)) {
+            return convertBinary(new CharArray(stream, charset), charset, skip, tokens, null, listeners);
         }
     }
 
-    public static ClausewitzItem convertBinary(BufferedReader reader, Charset charset, int skip, Map<Integer, String> tokens) throws IOException {
+    public static ClausewitzItem convertBinary(CharArray reader, Charset charset, int skip, Map<Integer, String> tokens) {
         return convertBinary(reader, charset, skip, tokens, null, new HashMap<>());
     }
 
-    public static ClausewitzItem convertBinary(BufferedReader reader, Charset charset, int skip, Map<Integer, String> tokens, String objectName,
-                                               Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
+    public static ClausewitzItem convertBinary(CharArray reader, Charset charset, int skip, Map<Integer, String> tokens, String objectName,
+                                               Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) {
         byte[] ch;
         boolean isEquals = false;
         ClausewitzPObject currentNode = new ClausewitzItem();
@@ -437,9 +430,9 @@ public class ClausewitzParser {
                         continue;
                     }
                     case OPEN -> {
-                        currentNode = ((ClausewitzItem) currentNode).addChild(strings.isEmpty() ? "" : strings.get(strings.size() - 1), isEquals);
+                        currentNode = ((ClausewitzItem) currentNode).addChild(strings.isEmpty() ? "" : strings.getLast(), isEquals);
                         if (!strings.isEmpty()) {
-                            strings.remove(strings.size() - 1);
+                            strings.removeLast();
                         }
                         isEquals = false;
                         ClausewitzPObject finalCurrentNode = currentNode;
@@ -498,7 +491,7 @@ public class ClausewitzParser {
         return (ClausewitzItem) currentNode;
     }
 
-    private static byte[] readToken(BufferedReader reader) throws IOException {
+    private static byte[] readToken(CharArray reader) {
         byte first = (byte) reader.read();
         byte second = (byte) reader.read();
 
@@ -509,7 +502,7 @@ public class ClausewitzParser {
         return new byte[] {first, second};
     }
 
-    private static String readBinaryString(BufferedReader reader, Charset charset) throws IOException {
+    private static String readBinaryString(CharArray reader, Charset charset) {
         char[] lenBytes = new char[2];
         reader.read(lenBytes);
         short len = ByteBuffer.wrap(new String(lenBytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getShort();
@@ -519,46 +512,46 @@ public class ClausewitzParser {
         return new String(string);
     }
 
-    private static boolean readBinaryBool(BufferedReader reader) throws IOException {
+    private static boolean readBinaryBool(CharArray reader) {
         return reader.read() == 0;
     }
 
-    private static long readBinaryUnsignedInt(BufferedReader reader, Charset charset) throws IOException {
+    private static long readBinaryUnsignedInt(CharArray reader, Charset charset) {
         char[] bytes = new char[4];
         reader.read(bytes);
 
         return Integer.toUnsignedLong(ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getInt());
     }
 
-    private static long readBinaryInt(BufferedReader reader, Charset charset) throws IOException {
+    private static long readBinaryInt(CharArray reader, Charset charset) {
         char[] bytes = new char[4];
         reader.read(bytes);
 
         return ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getInt();
     }
 
-    private static float readBinaryFloat(BufferedReader reader, Charset charset) throws IOException {
+    private static float readBinaryFloat(CharArray reader, Charset charset) {
         char[] bytes = new char[4];
         reader.read(bytes);
 
         return ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getInt() / 1_000f;
     }
 
-    private static double readBinaryDouble(BufferedReader reader, Charset charset) throws IOException {
+    private static double readBinaryDouble(CharArray reader, Charset charset) {
         char[] bytes = new char[8];
         reader.read(bytes);
 
         return ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getInt() / 65_536d * 2;
     }
 
-    private static String readBinaryUnsignedLong(BufferedReader reader, Charset charset) throws IOException {
+    private static String readBinaryUnsignedLong(CharArray reader, Charset charset) {
         char[] bytes = new char[8];
         reader.read(bytes);
 
         return Long.toUnsignedString(ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getLong());
     }
 
-    private static String readBinaryColor(BufferedReader reader) throws IOException {
+    private static String readBinaryColor(CharArray reader) {
         char[] bytes = new char[22];
         reader.read(bytes);
 

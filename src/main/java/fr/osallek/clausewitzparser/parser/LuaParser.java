@@ -4,20 +4,19 @@ import fr.osallek.clausewitzparser.common.ClausewitzParseException;
 import fr.osallek.clausewitzparser.ic4j.CharsetDetector;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class LuaParser {
 
     private LuaParser() {}
+
 
     public static Map<String, Object> parse(File file) throws IOException {
         try {
@@ -36,12 +35,10 @@ public final class LuaParser {
     }
 
     public static Map<String, Object> parse(File file, Charset charset) throws IOException {
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
-            return parse(reader, new LinkedHashMap<>(), false);
-        }
+        return parse(new CharArray(file, charset), new LinkedHashMap<>(), false);
     }
 
-    public static Map<String, Object> parse(BufferedReader reader, Map<String, Object> map, boolean isDot) throws IOException {
+    public static Map<String, Object> parse(CharArray reader, Map<String, Object> map, boolean isDot) {
         if (reader == null) {
             return map;
         }
@@ -50,7 +47,7 @@ public final class LuaParser {
         boolean isEquals = false;
 
         int letter;
-        while ((letter = reader.read()) > -1) {
+        while ((letter = reader.read()) >= 0) {
             if ('\n' == letter && isDot) {
                 return map;
             }
@@ -60,7 +57,7 @@ public final class LuaParser {
             }
 
             if ('"' == letter && isEquals) {
-                map.put(key, ParserUtils.readQuoted(reader, false));
+                map.put(key, reader.readQuoted(false));
                 isEquals = false;
                 continue;
             }
@@ -86,16 +83,14 @@ public final class LuaParser {
             }
 
             if ('-' == letter) {
-                reader.mark(1);
+                int c;
 
-                if ('-' == reader.read()) {
-                    ParserUtils.readEndOfLine(reader);
+                if ((c = reader.read()) == '-') {
+                    reader.readEndOfLine();
                     continue;
                 } else {
-                    reader.reset();
-
                     if (isEquals) {
-                        map.put(key, ParserUtils.readNumber(reader, letter));
+                        map.put(key, reader.readNumber(letter, c));
                         isEquals = false;
                         continue;
                     }
@@ -108,12 +103,12 @@ public final class LuaParser {
             }
 
             if (Character.isDigit(letter) && isEquals) {
-                map.put(key, ParserUtils.readNumber(reader, letter));
+                map.put(key, reader.readNumber(letter));
                 isEquals = false;
                 continue;
             }
 
-            key = ParserUtils.readString(reader, letter);
+            key = reader.readString(letter);
         }
 
         return map;

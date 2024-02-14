@@ -25,20 +25,20 @@ public final class ClausewitzList extends ClausewitzPObject {
     private final boolean hasBrackets;
 
     public ClausewitzList(ClausewitzItem parent, String name, int order) {
-        this(parent, name, order, false);
+        this(parent, name, order, null);
     }
 
-    public ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine) {
+    public ClausewitzList(ClausewitzItem parent, String name, int order, Boolean sameLine) {
         this(parent, name, order, sameLine, true);
     }
 
-    public ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine, boolean hasBrackets) {
+    public ClausewitzList(ClausewitzItem parent, String name, int order, Boolean sameLine, boolean hasBrackets) {
         this(parent, name, order, sameLine, hasBrackets, false);
     }
 
-    public ClausewitzList(ClausewitzItem parent, String name, int order, boolean sameLine, boolean hasBrackets, boolean increaseOrder) {
+    public ClausewitzList(ClausewitzItem parent, String name, int order, Boolean sameLine, boolean hasBrackets, boolean increaseOrder) {
         super(name, order, parent, increaseOrder);
-        this.sameLine = sameLine;
+        this.sameLine = sameLine != null && sameLine;
         this.hasBrackets = hasBrackets;
 
         if (increaseOrder) {
@@ -55,7 +55,7 @@ public final class ClausewitzList extends ClausewitzPObject {
 
     private List<String> getInternalValues() {
         if (this.values == null) {
-            this.values = new ArrayList<>(0);
+            this.values = new ArrayList<>(1);
         }
 
         return this.values;
@@ -173,7 +173,7 @@ public final class ClausewitzList extends ClausewitzPObject {
                 val = ClausewitzUtils.addQuotes(val);
             }
 
-            getInternalValues().add(val.intern());
+            getInternalValues().add(val);
         }
     }
 

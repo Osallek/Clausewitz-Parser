@@ -4,19 +4,18 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.clausewitzparser.parser.CharArray;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Map;
@@ -31,9 +30,9 @@ class ClausewitzParserTest {
         File tokens = RESOURCE_FOLDER.resolve("tokens.txt").toFile();
         File file = RESOURCE_FOLDER.resolve("binary_gamestate").toFile();
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.ISO_8859_1);
-             FileInputStream tokensFileStream = new FileInputStream(tokens); ObjectInputStream tokensStream = new ObjectInputStream(tokensFileStream)) {
-            ClausewitzParser.convertBinary(reader, StandardCharsets.ISO_8859_1, 6, (Map<Integer, String>) tokensStream.readObject());
+        try (FileInputStream tokensFileStream = new FileInputStream(tokens); ObjectInputStream tokensStream = new ObjectInputStream(tokensFileStream)) {
+            ClausewitzParser.convertBinary(new CharArray(file, StandardCharsets.ISO_8859_1), StandardCharsets.ISO_8859_1, 6,
+                                           (Map<Integer, String>) tokensStream.readObject());
         }
     }
 
@@ -103,6 +102,39 @@ class ClausewitzParserTest {
             Assertions.assertEquals(true, grandChild.getVarAsBool("human"));
             Assertions.assertEquals("\"magisterium\"", grandChild.getVarAsString("government_name"));
             Assertions.assertEquals(LocalDate.of(1444, 11, 11), grandChild.getVarAsDate("last_focus_move"));
+        }
+    }
+
+    @Test
+    void testParseCompressedCk3Save() throws IOException {
+        Configurator.setLevel(ClausewitzParser.class.getCanonicalName(), Level.DEBUG);
+
+        try (ZipFile zipFile = new ZipFile(RESOURCE_FOLDER.resolve("save.ck3").toFile())) {
+            ClausewitzItem root = ClausewitzParser.parse(zipFile, "gamestate", 0);
+
+            Assertions.assertNotNull(root);
+
+            Assertions.assertEquals(585604387, root.getVarAsInt("random_seed"));
+
+            ClausewitzItem child = root.getChild("living");
+            Assertions.assertNotNull(child);
+            Assertions.assertFalse(child.isEmpty());
+
+            ClausewitzItem grandChild = child.getChild("33669281");
+            Assertions.assertNotNull(grandChild);
+            Assertions.assertFalse(grandChild.isEmpty());
+            Assertions.assertEquals("\"GozE_\"", grandChild.getVarAsString("first_name"));
+
+            child = root.getChild("units");
+            Assertions.assertNotNull(child);
+            Assertions.assertFalse(child.isEmpty());
+
+            grandChild = child.getChild("2986344448");
+            Assertions.assertNotNull(grandChild);
+            Assertions.assertFalse(grandChild.isEmpty());
+            Assertions.assertEquals(5525, grandChild.getVarAsInt("location"));
+            Assertions.assertEquals("army", grandChild.getVarAsString("type"));
+            Assertions.assertEquals(LocalDate.of(1123, 6, 21), grandChild.getVarAsDate("arrival_date"));
         }
     }
 

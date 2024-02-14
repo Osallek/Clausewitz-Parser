@@ -58,7 +58,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     private List<ClausewitzItem> getInternalChildren() {
         if (this.children == null) {
-            this.children = new ArrayList<>(0);
+            this.children = new ArrayList<>(1);
         }
 
         return this.children;
@@ -66,7 +66,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     private List<ClausewitzVariable> getInternalVariables() {
         if (this.variables == null) {
-            this.variables = new ArrayList<>(0);
+            this.variables = new ArrayList<>(1);
         }
 
         return this.variables;
@@ -74,7 +74,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     private List<ClausewitzList> getInternalLists() {
         if (this.lists == null) {
-            this.lists = new ArrayList<>(0);
+            this.lists = new ArrayList<>(1);
         }
 
         return this.lists;

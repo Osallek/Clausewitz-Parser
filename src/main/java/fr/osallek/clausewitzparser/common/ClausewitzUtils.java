@@ -85,7 +85,7 @@ public final class ClausewitzUtils {
     }
 
     public static String removeQuotes(String s) {
-        if (s == null || s.length() < 1) {
+        if (s == null || s.isEmpty()) {
             return s;
         }
 
@@ -93,7 +93,7 @@ public final class ClausewitzUtils {
             s = s.substring(1);
         }
 
-        if (s.length() >= 1 && '"' == s.charAt(s.length() - 1)) {
+        if (!s.isEmpty() && '"' == s.charAt(s.length() - 1)) {
             s = s.substring(0, s.length() - 1);
         }
 

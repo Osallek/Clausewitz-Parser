@@ -112,7 +112,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
     }
 
     public void setValue(String value) {
-        this.value = value.intern();
+        this.value = value;
     }
 
     public void setValue(int value) {

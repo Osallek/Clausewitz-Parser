@@ -13,7 +13,7 @@ public abstract class ClausewitzObject {
     protected int order;
 
     protected ClausewitzObject(String name, int order) {
-        this.name = name == null ? null : name.intern();
+        this.name = name;
         this.order = order;
     }
 
