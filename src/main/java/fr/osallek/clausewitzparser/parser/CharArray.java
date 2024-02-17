@@ -200,18 +200,23 @@ public class CharArray {
 
     public void skipTillNext(int stopChar, boolean stopEndOfLine) {
         int letter;
+        boolean eof = true;
 
         while ((letter = read()) > -1) {
             if (stopEndOfLine && '\n' == letter) {
+                eof = false;
                 break;
             }
 
             if (stopChar == letter) {
+                eof = false;
                 break;
             }
         }
 
-        addPosition(-1);
+        if (!eof) {
+            addPosition(-1);
+        }
     }
 
     public Number readNumber(int... firstChar) {

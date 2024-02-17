@@ -146,15 +146,31 @@ public class ClausewitzParser {
         }
     }
 
+    public static ClausewitzObject findFirstSingleObject(File file, int skip, List<String> objectNames) {
+        try {
+            return findFirstSingleObject(file, skip, objectNames, StandardCharsets.ISO_8859_1);
+        } catch (ClausewitzParseException e) {
+            if (CharacterCodingException.class.equals(e.getCause().getClass())) {
+                return findFirstSingleObject(file, skip, objectNames, StandardCharsets.UTF_8);
+            } else {
+                throw e;
+            }
+        }
+    }
+
     public static ClausewitzObject readSingleObject(File file, int skip, String objectName, Charset charset) {
-        if (objectName == null) {
+        return findFirstSingleObject(file, skip, List.of(objectName), charset);
+    }
+
+    public static ClausewitzObject findFirstSingleObject(File file, int skip, List<String> objectNames, Charset charset) {
+        if (objectNames == null) {
             throw new NullPointerException("objectName is null");
         }
 
         ClausewitzItem root = new ClausewitzItem();
 
         try {
-            readSingleObject(new CharArray(file, charset), skip, root, objectName);
+            readSingleObject(new CharArray(file, charset), skip, root, objectNames);
         } catch (CharacterCodingException e) {
             throw new ClausewitzParseException(e);
         } catch (IOException e) {
@@ -167,7 +183,12 @@ public class ClausewitzParser {
 
     public static ClausewitzObject readSingleObjectBinary(ZipFile zipFile, String entryName, int skip, String objectName, Charset charset,
                                                           Map<Integer, String> tokens) {
-        if (objectName == null) {
+        return readSingleObjectBinary(zipFile, entryName, skip, List.of(objectName), charset, tokens);
+    }
+
+    public static ClausewitzObject readSingleObjectBinary(ZipFile zipFile, String entryName, int skip, List<String> objectNames, Charset charset,
+                                                          Map<Integer, String> tokens) {
+        if (objectNames == null) {
             throw new NullPointerException("objectName is null");
         }
 
@@ -181,7 +202,7 @@ public class ClausewitzParser {
         }
 
         try (InputStream stream = zipFile.getInputStream(zipEntry);) {
-            return convertBinary(new CharArray(stream, charset), charset, skip, tokens, objectName, new HashMap<>());
+            return convertBinary(new CharArray(stream, charset), charset, skip, tokens, objectNames, new HashMap<>());
         } catch (CharacterCodingException e) {
             throw new ClausewitzParseException(e);
         } catch (IOException e) {
@@ -192,18 +213,30 @@ public class ClausewitzParser {
 
     public static ClausewitzObject readSingleObject(ZipFile zipFile, String entryName, int skip, String objectName) {
         try {
-            return readSingleObject(zipFile, entryName, skip, objectName, StandardCharsets.ISO_8859_1);
+            return readSingleObject(zipFile, entryName, skip, List.of(objectName), StandardCharsets.ISO_8859_1);
         } catch (ClausewitzParseException e) {
             if (CharacterCodingException.class.equals(e.getCause().getClass())) {
-                return readSingleObject(zipFile, entryName, skip, objectName, StandardCharsets.UTF_8);
+                return readSingleObject(zipFile, entryName, skip, List.of(objectName), StandardCharsets.UTF_8);
             } else {
                 throw e;
             }
         }
     }
 
-    private static ClausewitzObject readSingleObject(ZipFile zipFile, String entryName, int skip, String objectName, Charset charset) {
-        if (objectName == null) {
+    public static ClausewitzObject findFirstSingleObject(ZipFile zipFile, String entryName, int skip, List<String> objectNames) {
+        try {
+            return readSingleObject(zipFile, entryName, skip, objectNames, StandardCharsets.ISO_8859_1);
+        } catch (ClausewitzParseException e) {
+            if (CharacterCodingException.class.equals(e.getCause().getClass())) {
+                return readSingleObject(zipFile, entryName, skip, objectNames, StandardCharsets.UTF_8);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private static ClausewitzObject readSingleObject(ZipFile zipFile, String entryName, int skip, List<String> objectNames, Charset charset) {
+        if (objectNames == null) {
             throw new NullPointerException("objectName is null");
         }
 
@@ -220,7 +253,7 @@ public class ClausewitzParser {
         }
 
         try (InputStream stream = zipFile.getInputStream(zipEntry);) {
-            readSingleObject(new CharArray(stream, charset), skip, root, objectName);
+            readSingleObject(new CharArray(stream, charset), skip, root, objectNames);
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
         }
@@ -228,7 +261,7 @@ public class ClausewitzParser {
         return root.isEmpty() ? null : root.getAllOrdered().getFirst();
     }
 
-    private static void readSingleObject(CharArray reader, int skip, ClausewitzItem root, String objectName) {
+    private static void readSingleObject(CharArray reader, int skip, ClausewitzItem root, List<String> objectNames) {
         for (int i = 1; i <= skip; i++) {
             reader.skipLine();
         }
@@ -241,7 +274,18 @@ public class ClausewitzParser {
 
             if (currentLine == null) {
                 return;
-            } else if (currentLine.trim().startsWith(objectName)) {
+            }
+
+            boolean found = false;
+            currentLine = currentLine.trim();
+            for (String objectName : objectNames) {
+                if (currentLine.startsWith(objectName)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found) {
                 reader.position(position);
                 break;
             }
@@ -257,16 +301,17 @@ public class ClausewitzParser {
         }
 
         int letter;
-        List<String> strings = new ArrayList<>();
+        List<String> strings = new ArrayList<>(2);
         boolean isEquals = false;
         int nbNewLine = 0;
 
         while ((letter = reader.read()) >= 0) {
-            if (letter == ' ' || letter == '\t' || letter == '\n' || letter == '\r') {
-                if ('\n' == letter) {
-                    nbNewLine++;
-                }
+            if ('\n' == letter) {
+                nbNewLine++;
+                continue;
+            }
 
+            if (letter == ' ' || letter == '\t' || letter == '\r') {
                 continue;
             }
 
@@ -372,7 +417,7 @@ public class ClausewitzParser {
         return convertBinary(reader, charset, skip, tokens, null, new HashMap<>());
     }
 
-    public static ClausewitzItem convertBinary(CharArray reader, Charset charset, int skip, Map<Integer, String> tokens, String objectName,
+    public static ClausewitzItem convertBinary(CharArray reader, Charset charset, int skip, Map<Integer, String> tokens, List<String> objectNames,
                                                Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) {
         byte[] ch;
         boolean isEquals = false;
@@ -459,7 +504,7 @@ public class ClausewitzParser {
                             strings.clear();
                         }
 
-                        if (objectName != null && objectName.equals(currentNode.getName())) {
+                        if (objectNames != null && objectNames.contains(currentNode.getName())) {
                             return (ClausewitzItem) currentNode;
                         }
 
