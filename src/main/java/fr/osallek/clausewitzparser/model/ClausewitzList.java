@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class ClausewitzList extends ClausewitzPObject {
 
@@ -313,16 +314,32 @@ public final class ClausewitzList extends ClausewitzPObject {
         return new ArrayList<>();
     }
 
+    public Stream<String> getStream() {
+        return this.values == null ? Stream.empty() : this.values.stream();
+    }
+
     public List<Integer> getValuesAsInt() {
         return getValues().stream().map(Integer::parseInt).collect(Collectors.toList());
+    }
+
+    public Stream<Integer> getStreamAsInt() {
+        return getStream().map(Integer::parseInt);
     }
 
     public List<Double> getValuesAsDouble() {
         return getValues().stream().map(Double::parseDouble).collect(Collectors.toList());
     }
 
+    public Stream<Double> getStreamAsDouble() {
+        return getStream().map(Double::parseDouble);
+    }
+
     public List<Boolean> getValuesAsBool() {
         return getValues().stream().map("yes"::equalsIgnoreCase).collect(Collectors.toList());
+    }
+
+    public Stream<Boolean> getStreamAsBool() {
+        return getStream().map("yes"::equalsIgnoreCase);
     }
 
     public void sort(Comparator<String> comparator) {
