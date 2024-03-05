@@ -153,7 +153,7 @@ public final class ClausewitzVariable extends ClausewitzObject {
 
         ClausewitzVariable ov = (ClausewitzVariable) obj;
 
-        return name.equalsIgnoreCase(ov.name) && value.equals(ov.value);
+        return name.equals(ov.name) && value.equals(ov.value);
     }
 
     @Override

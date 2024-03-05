@@ -306,6 +306,10 @@ public class ClausewitzParser {
         int nbNewLine = 0;
 
         while ((letter = reader.read()) >= 0) {
+            if (0 == letter) {
+                return;
+            }
+
             if ('\n' == letter) {
                 nbNewLine++;
                 continue;
@@ -389,12 +393,12 @@ public class ClausewitzParser {
 
             if (isEquals) { //Value
                 if (!strings.isEmpty()) {
-                    ((ClausewitzItem) currentNode).addVariable(strings.getFirst(), reader.readStringOrNumber(letter).trim());
+                    ((ClausewitzItem) currentNode).addVariable(strings.getFirst(), reader.readStringOrNumber(letter));
                 }
                 isEquals = false;
                 strings.clear();
             } else { //Key
-                strings.add(reader.readStringOrNumber(letter).trim());
+                strings.add(reader.readStringOrNumber(letter));
             }
         }
     }

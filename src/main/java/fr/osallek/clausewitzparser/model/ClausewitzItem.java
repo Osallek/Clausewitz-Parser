@@ -134,7 +134,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
         if (this.children != null) {
             int j = 0;
             for (int i = 0; i < this.children.size(); i++) {
-                if (this.children.get(i).getName().equalsIgnoreCase(childName)) {
+                if (this.children.get(i).getName().equals(childName)) {
                     if (j == id) {
                         return this.children.remove(i) != null;
                     }
@@ -150,7 +150,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public boolean removeChild(String childName) {
         if (this.children != null) {
             for (int i = 0; i < this.children.size(); i++) {
-                if (this.children.get(i).getName().equalsIgnoreCase(childName)) {
+                if (this.children.get(i).getName().equals(childName)) {
                     return this.children.remove(i) != null;
                 }
             }
@@ -162,7 +162,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public boolean removeLastChild(String childName) {
         if (this.children != null) {
             for (int i = this.children.size() - 1; i >= 0; i--) {
-                if (this.children.get(i).getName().equalsIgnoreCase(childName)) {
+                if (this.children.get(i).getName().equals(childName)) {
                     return this.children.remove(i) != null;
                 }
             }
@@ -173,7 +173,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public boolean removeChildren(String childName) {
         if (this.children != null) {
-            return this.children.removeIf(child -> child.getName().equalsIgnoreCase(childName));
+            return this.children.removeIf(child -> child.getName().equals(childName));
         }
 
         return false;
@@ -495,7 +495,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
         if (this.variables != null) {
             int j = 0;
             for (int i = 0; i < this.variables.size(); i++) {
-                if (this.variables.get(i).getName().equalsIgnoreCase(varName)) {
+                if (this.variables.get(i).getName().equals(varName)) {
                     j++;
 
                     if (j == id) {
@@ -511,7 +511,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public boolean removeVariable(String varName) {
         if (this.variables != null) {
             for (int i = 0; i < this.variables.size(); i++) {
-                if (this.variables.get(i).getName().equalsIgnoreCase(varName)) {
+                if (this.variables.get(i).getName().equals(varName)) {
                     return this.variables.remove(i) != null;
                 }
             }
@@ -522,7 +522,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
     public boolean removeVariables(String varName) {
         if (this.variables != null) {
-            return this.variables.removeIf(variable -> variable.getName().equalsIgnoreCase(varName));
+            return this.variables.removeIf(variable -> variable.getName().equals(varName));
         }
 
         return false;
@@ -533,7 +533,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
             for (int i = 0; i < this.variables.size(); i++) {
                 ClausewitzVariable variable = this.variables.get(i);
 
-                if (variable.getName().equalsIgnoreCase(varName) && variable.getValue().equalsIgnoreCase(value)) {
+                if (variable.getName().equals(varName) && variable.getValue().equals(value)) {
                     return this.variables.remove(i) != null;
                 }
             }
@@ -545,7 +545,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public boolean removeLastVariable(String varName) {
         if (this.variables != null) {
             for (int i = this.variables.size() - 1; i >= 0; i--) {
-                if (this.variables.get(i).getName().equalsIgnoreCase(varName)) {
+                if (this.variables.get(i).getName().equals(varName)) {
                     return this.variables.remove(i) != null;
                 }
             }
@@ -563,7 +563,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public boolean removeVariableByValue(String value) {
         if (this.variables != null) {
             for (int i = 0; i < this.variables.size(); i++) {
-                if (this.variables.get(i).getValue().equalsIgnoreCase(value)) {
+                if (this.variables.get(i).getValue().equals(value)) {
                     return this.variables.remove(i) != null;
                 }
             }
@@ -759,7 +759,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public boolean removeList(String varName) {
         if (this.lists != null) {
             for (int i = 0; i < this.lists.size(); i++) {
-                if (this.lists.get(i).getName().equalsIgnoreCase(varName)) {
+                if (this.lists.get(i).getName().equals(varName)) {
                     return this.lists.remove(i) != null;
                 }
             }
@@ -811,7 +811,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzItem getChild(String childName) {
         if (this.children != null) {
             for (ClausewitzItem child : this.children) {
-                if (child.getName().equalsIgnoreCase(childName)) {
+                if (child.getName().equals(childName)) {
                     return child;
                 }
             }
@@ -828,7 +828,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
         if (this.children != null) {
             int j = 0;
             for (ClausewitzItem child : this.children) {
-                if (child.getName().equalsIgnoreCase(childName)) {
+                if (child.getName().equals(childName)) {
                     if (j == index) {
                         return child;
                     }
@@ -844,7 +844,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzItem getLastChild(String childName) {
         if (this.children != null) {
             for (int i = this.children.size() - 1; i >= 0; i--) {
-                if (this.children.get(i).getName().equalsIgnoreCase(childName)) {
+                if (this.children.get(i).getName().equals(childName)) {
                     return children.get(i);
                 }
             }
@@ -858,7 +858,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
         if (this.children != null) {
             for (ClausewitzItem child : this.children) {
-                if (child.getName().equalsIgnoreCase(name)) {
+                if (child.getName().equals(name)) {
                     list.add(child);
                 }
             }
@@ -872,7 +872,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
         if (this.children != null) {
             for (ClausewitzItem child : this.children) {
-                if (!child.getName().equalsIgnoreCase(name)) {
+                if (!child.getName().equals(name)) {
                     list.add(child);
                 }
             }
@@ -886,7 +886,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
         if (this.children != null) {
             for (ClausewitzItem child : this.children) {
-                if (Arrays.stream(names).noneMatch(child.getName()::equalsIgnoreCase)) {
+                if (Arrays.stream(names).noneMatch(child.getName()::equals)) {
                     list.add(child);
                 }
             }
@@ -920,7 +920,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList getList(String listName) {
         if (this.lists != null) {
             for (ClausewitzList list : this.lists) {
-                if (list.getName().equalsIgnoreCase(listName)) {
+                if (list.getName().equals(listName)) {
                     return list;
                 }
             }
@@ -932,7 +932,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzList getLastList(String childName) {
         if (this.lists != null) {
             for (int i = this.lists.size() - 1; i >= 0; i--) {
-                if (this.lists.get(i).getName().equalsIgnoreCase(childName)) {
+                if (this.lists.get(i).getName().equals(childName)) {
                     return lists.get(i);
                 }
             }
@@ -950,7 +950,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
         if (this.lists != null) {
             for (ClausewitzList list : this.lists) {
-                if (list.getName().equalsIgnoreCase(varName)) {
+                if (list.getName().equals(varName)) {
                     clausewitzLists.add(list);
                 }
             }
@@ -964,7 +964,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
         if (this.lists != null) {
             for (ClausewitzList list : this.lists) {
-                if (!list.getName().equalsIgnoreCase(name)) {
+                if (!list.getName().equals(name)) {
                     listList.add(list);
                 }
             }
@@ -984,7 +984,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzVariable getVar(String varName) {
         if (this.variables != null) {
             for (ClausewitzVariable variable : this.variables) {
-                if (variable.getName().equalsIgnoreCase(varName)) {
+                if (variable.getName().equals(varName)) {
                     return variable;
                 }
             }
@@ -996,7 +996,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzVariable getVar(String varName, String value) {
         if (this.variables != null) {
             for (ClausewitzVariable variable : this.variables) {
-                if (variable.getName().equalsIgnoreCase(varName) && variable.getValue().equalsIgnoreCase(value)) {
+                if (variable.getName().equals(varName) && variable.getValue().equals(value)) {
                     return variable;
                 }
             }
@@ -1017,7 +1017,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
         if (this.variables != null) {
             int j = 0;
             for (ClausewitzVariable variable : this.variables) {
-                if (variable.getName().equalsIgnoreCase(varName)) {
+                if (variable.getName().equals(varName)) {
                     if (j == index) {
                         return variable;
                     }
@@ -1033,7 +1033,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public ClausewitzVariable getLastVar(String varName) {
         if (this.variables != null) {
             for (int i = this.variables.size() - 1; i >= 0; i--) {
-                if (this.variables.get(i).getName().equalsIgnoreCase(varName)) {
+                if (this.variables.get(i).getName().equals(varName)) {
                     return this.variables.get(i);
                 }
             }
@@ -1075,7 +1075,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
     public String getLastVarAsString(String varName) {
         if (this.variables != null) {
             for (int i = this.variables.size() - 1; i >= 0; i--) {
-                if (this.variables.get(i).getName().equalsIgnoreCase(varName)) {
+                if (this.variables.get(i).getName().equals(varName)) {
                     return this.variables.get(i).getValue();
                 }
             }
@@ -1089,7 +1089,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
         if (this.variables != null) {
             for (ClausewitzVariable variable : this.variables) {
-                if (variable.getName().equalsIgnoreCase(varName)) {
+                if (variable.getName().equals(varName)) {
                     vars.add(variable);
                 }
             }
@@ -1202,7 +1202,7 @@ public final class ClausewitzItem extends ClausewitzPObject {
 
         if (this.variables != null) {
             for (ClausewitzVariable variable : this.variables) {
-                if (variable.getName().equalsIgnoreCase(varName)) {
+                if (variable.getName().equals(varName)) {
                     list.add(variable);
                 }
             }

@@ -133,7 +133,7 @@ public final class ClausewitzList extends ClausewitzPObject {
     public boolean remove(String value) {
         if (this.values != null) {
             for (int i = 0; i < this.values.size(); i++) {
-                if (this.values.get(i).equalsIgnoreCase(value)) {
+                if (this.values.get(i).equals(value)) {
                     return this.values.remove(i) != null;
                 }
             }
@@ -145,7 +145,7 @@ public final class ClausewitzList extends ClausewitzPObject {
     public boolean removeLast(String value) {
         if (this.values != null) {
             for (int i = this.values.size() - 1; i >= 0; i--) {
-                if (this.values.get(i).equalsIgnoreCase(value)) {
+                if (this.values.get(i).equals(value)) {
                     return this.values.remove(i) != null;
                 }
             }
@@ -156,7 +156,7 @@ public final class ClausewitzList extends ClausewitzPObject {
 
     public boolean removeAll(String value) {
         if (this.values != null) {
-            return this.values.removeIf(s -> s.equalsIgnoreCase(value));
+            return this.values.removeIf(s -> s.equals(value));
         }
 
         return false;
@@ -246,7 +246,7 @@ public final class ClausewitzList extends ClausewitzPObject {
             Integer index = null;
 
             for (int i = 0; i < this.values.size(); i++) {
-                if (this.values.get(i).equalsIgnoreCase(previous)) {
+                if (this.values.get(i).equals(previous)) {
                     index = i;
                     break;
                 }
@@ -335,11 +335,11 @@ public final class ClausewitzList extends ClausewitzPObject {
     }
 
     public List<Boolean> getValuesAsBool() {
-        return getValues().stream().map("yes"::equalsIgnoreCase).collect(Collectors.toList());
+        return getValues().stream().map("yes"::equals).collect(Collectors.toList());
     }
 
     public Stream<Boolean> getStreamAsBool() {
-        return getStream().map("yes"::equalsIgnoreCase);
+        return getStream().map("yes"::equals);
     }
 
     public void sort(Comparator<String> comparator) {
