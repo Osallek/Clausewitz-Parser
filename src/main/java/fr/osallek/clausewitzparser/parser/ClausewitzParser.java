@@ -201,8 +201,10 @@ public class ClausewitzParser {
             throw new NullPointerException("zipFile null");
         }
 
-        try (InputStream stream = zipFile.getInputStream(zipEntry);) {
-            return convertBinary(new CharArray(stream, charset), charset, skip, tokens, objectNames, new HashMap<>());
+        try (InputStream stream = zipFile.getInputStream(zipEntry)) {
+            ClausewitzItem root = convertBinary(new CharArray(stream, charset), charset, skip, tokens, objectNames, new HashMap<>());
+
+            return root.isEmpty() ? null : root.getAllOrdered().getFirst();
         } catch (CharacterCodingException e) {
             throw new ClausewitzParseException(e);
         } catch (IOException e) {
@@ -294,8 +296,8 @@ public class ClausewitzParser {
         readObject(root, reader, new HashMap<>(), true);
     }
 
-    private static void readObject(ClausewitzPObject currentNode, CharArray reader,
-                                   Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners, boolean readOnlyOneObject) {
+    private static void readObject(ClausewitzPObject currentNode, CharArray reader, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners,
+                                   boolean readOnlyOneObject) {
         if (currentNode == null) {
             throw new NullPointerException("node is null");
         }
@@ -527,9 +529,14 @@ public class ClausewitzParser {
             }
 
             if (isEquals) { //Value
-                ((ClausewitzItem) currentNode).addVariable(strings.get(0), strings.get(1));
+                String key = strings.get(0);
+                ((ClausewitzItem) currentNode).addVariable(key, strings.get(1));
                 isEquals = false;
                 strings.clear();
+
+                if (objectNames != null && objectNames.contains(key)) {
+                    return (ClausewitzItem) currentNode;
+                }
             }
         }
 

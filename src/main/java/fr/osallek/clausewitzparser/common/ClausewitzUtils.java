@@ -16,6 +16,8 @@ public final class ClausewitzUtils {
 
     public static final Pattern DATE_PATTERN = Pattern.compile("^\\d{1,4}\\.\\d{1,2}\\.\\d{1,2}$");
 
+    public static final char QUOTE = '"';
+
     /*Copied from Apache commons*/
     public static boolean isBlank(final CharSequence cs) {
         int strLen;
@@ -69,19 +71,14 @@ public final class ClausewitzUtils {
             return null;
         }
 
-        if (s.isEmpty()) {
-            return "\"\"";
-        }
+        boolean start = s.isEmpty() || (QUOTE != s.charAt(0));
+        boolean end = s.isEmpty() || (QUOTE != s.charAt(s.length() - 1));
 
-        if ('"' != s.charAt(0)) {
-            s = "\"" + s;
+        if (start || end) {
+            return (start ? QUOTE : "") + s + (end ? QUOTE : "");
+        } else {
+            return s;
         }
-
-        if ('"' != s.charAt(s.length() - 1)) {
-            s = s + "\"";
-        }
-
-        return s;
     }
 
     public static String removeQuotes(String s) {
@@ -89,15 +86,18 @@ public final class ClausewitzUtils {
             return s;
         }
 
-        if ('"' == s.charAt(0)) {
-            s = s.substring(1);
+        int start = 0;
+        int end = s.length();
+
+        if (QUOTE == s.charAt(0)) {
+            start++;
         }
 
-        if (!s.isEmpty() && '"' == s.charAt(s.length() - 1)) {
-            s = s.substring(0, s.length() - 1);
+        if (QUOTE == s.charAt(s.length() - 1)) {
+            end--;
         }
 
-        return s;
+        return s.substring(start, end);
     }
 
     public static boolean hasAtLeast(String s, char c, int atLeast) {
