@@ -18,6 +18,8 @@ import java.io.ObjectInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
@@ -33,6 +35,28 @@ class ClausewitzParserTest {
         try (FileInputStream tokensFileStream = new FileInputStream(tokens); ObjectInputStream tokensStream = new ObjectInputStream(tokensFileStream)) {
             ClausewitzParser.convertBinary(new CharArray(file, StandardCharsets.ISO_8859_1), StandardCharsets.ISO_8859_1, 6,
                                            (Map<Integer, String>) tokensStream.readObject());
+        }
+    }
+
+    @Test
+    void testBinarySingle() throws IOException, ClassNotFoundException {
+        File tokens = RESOURCE_FOLDER.resolve("tokens.txt").toFile();
+        File file = RESOURCE_FOLDER.resolve("binary_meta").toFile();
+
+        try (FileInputStream tokensFileStream = new FileInputStream(tokens); ObjectInputStream tokensStream = new ObjectInputStream(tokensFileStream)) {
+            ClausewitzItem item = ClausewitzParser.convertBinary(new CharArray(file, StandardCharsets.ISO_8859_1), StandardCharsets.ISO_8859_1, 6,
+                                                                     (Map<Integer, String>) tokensStream.readObject(),
+                                                                     List.of("mods_enabled_names", "multi_player"), new HashMap<>());
+
+            Assertions.assertNotNull(item);
+            Assertions.assertEquals("mods_enabled_names", item.getName());
+            Assertions.assertEquals(9, item.getNbChildren());
+
+            item = item.getChild(0);
+            Assertions.assertNotNull(item);
+            Assertions.assertEquals(2, item.getNbVariables());
+            Assertions.assertEquals("\"mod/ugc_2451296932.mod\"", item.getVarAsString("filename"));
+            Assertions.assertEquals("\"Xorme - AI\"", item.getVarAsString("name"));
         }
     }
 
