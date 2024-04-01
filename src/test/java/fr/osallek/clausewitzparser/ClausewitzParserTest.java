@@ -44,11 +44,14 @@ class ClausewitzParserTest {
         File file = RESOURCE_FOLDER.resolve("binary_meta").toFile();
 
         try (FileInputStream tokensFileStream = new FileInputStream(tokens); ObjectInputStream tokensStream = new ObjectInputStream(tokensFileStream)) {
-            ClausewitzItem item = ClausewitzParser.convertBinary(new CharArray(file, StandardCharsets.ISO_8859_1), StandardCharsets.ISO_8859_1, 6,
-                                                                     (Map<Integer, String>) tokensStream.readObject(),
-                                                                     List.of("mods_enabled_names", "multi_player"), new HashMap<>());
+            ClausewitzObject object = ClausewitzParser.convertBinary(new CharArray(file, StandardCharsets.ISO_8859_1), StandardCharsets.ISO_8859_1, 6,
+                                                                   (Map<Integer, String>) tokensStream.readObject(),
+                                                                   List.of("mods_enabled_names", "multi_player"), new HashMap<>());
 
-            Assertions.assertNotNull(item);
+            Assertions.assertNotNull(object);
+            Assertions.assertInstanceOf(ClausewitzItem.class, object);
+
+            ClausewitzItem item = (ClausewitzItem) object;
             Assertions.assertEquals("mods_enabled_names", item.getName());
             Assertions.assertEquals(9, item.getNbChildren());
 
@@ -57,6 +60,22 @@ class ClausewitzParserTest {
             Assertions.assertEquals(2, item.getNbVariables());
             Assertions.assertEquals("\"mod/ugc_2451296932.mod\"", item.getVarAsString("filename"));
             Assertions.assertEquals("\"Xorme - AI\"", item.getVarAsString("name"));
+        }
+    }
+
+    @Test
+    void testBinarySingleVar() throws IOException, ClassNotFoundException {
+        File tokens = RESOURCE_FOLDER.resolve("tokens.txt").toFile();
+        File file = RESOURCE_FOLDER.resolve("binary_meta").toFile();
+
+        try (FileInputStream tokensFileStream = new FileInputStream(tokens); ObjectInputStream tokensStream = new ObjectInputStream(tokensFileStream)) {
+            ClausewitzObject item = ClausewitzParser.convertBinary(new CharArray(file, StandardCharsets.ISO_8859_1), StandardCharsets.ISO_8859_1, 6,
+                                                                   (Map<Integer, String>) tokensStream.readObject(),
+                                                                   List.of("date", "save_game"), new HashMap<>());
+
+            Assertions.assertNotNull(item);
+            Assertions.assertInstanceOf(ClausewitzVariable.class, item);
+            Assertions.assertEquals(LocalDate.of(1588, 2, 29), ((ClausewitzVariable) item).getAsDate());
         }
     }
 
