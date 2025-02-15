@@ -1,11 +1,5 @@
 package fr.osallek.clausewitzparser.model;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 public enum BinaryToken {
     QUOTED_STRING((short) 0x000F),
     NOT_QUOTED_STRING((short) 0x0017),
@@ -22,15 +16,20 @@ public enum BinaryToken {
 
     public final short token;
 
-    private static final Map<Short, BinaryToken> TOKEN_MAP = Arrays.stream(BinaryToken.values())
-                                                                   .collect(Collectors.toMap(BinaryToken::getToken, Function.identity()));
+    private static final BinaryToken[] VALUES = BinaryToken.values();
 
     BinaryToken(short token) {
         this.token = token;
     }
 
-    public static Optional<BinaryToken> ofToken(short token) {
-        return Optional.ofNullable(TOKEN_MAP.get(token));
+    public static BinaryToken ofToken(short token) {
+        for (BinaryToken value : VALUES) {
+            if (value.token == token) {
+                return value;
+            }
+        }
+
+        return null;
     }
 
     public short getToken() {

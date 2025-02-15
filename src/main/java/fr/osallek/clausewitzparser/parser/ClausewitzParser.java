@@ -1,6 +1,7 @@
 package fr.osallek.clausewitzparser.parser;
 
 import fr.osallek.clausewitzparser.common.ClausewitzParseException;
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.ic4j.CharsetDetector;
 import fr.osallek.clausewitzparser.model.BinaryToken;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
@@ -14,8 +15,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -25,7 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
@@ -329,11 +328,11 @@ public class ClausewitzParser {
                     ((ClausewitzItem) currentNode).addVariable(strings.getFirst(), reader.readQuoted(true));
                     isEquals = false;
                     strings.clear();
-                    continue;
                 } else {
                     strings.add(reader.readQuoted(true).trim());
-                    continue;
                 }
+
+                continue;
             }
 
             if ('=' == letter) {
@@ -373,8 +372,8 @@ public class ClausewitzParser {
                     if (previousItem != null) {
                         if (previousItem.getAllOrdered().isEmpty()) {
                             currentNode = currentNode.getParent()
-                                                     .changeChildToList(previousItem.getOrder(), currentNode.getName(),
-                                                                        strings.size() > 1 && nbNewLine <= 2, strings);
+                                                     .changeChildToList(previousItem.getOrder(), currentNode.getName(), strings.size() > 1 && nbNewLine <= 2,
+                                                                        strings);
                         } else {
                             previousItem.addList("", strings.size() > 1 && nbNewLine <= previousItem.getNbObjects() * 2 + 2, false, strings);
                         }
@@ -383,8 +382,8 @@ public class ClausewitzParser {
                     }
                 }
 
-                if (nbNewLine <= 2 && ClausewitzItem.class.equals(currentNode.getClass()) && ((ClausewitzItem) currentNode).getNbChildren() == 0
-                    && ((ClausewitzItem) currentNode).getNbLists() == 0 && ((ClausewitzItem) currentNode).getNbVariables() > 1) {
+                if (nbNewLine <= 2 && ClausewitzItem.class.equals(currentNode.getClass()) && ((ClausewitzItem) currentNode).getNbChildren() == 0 &&
+                    ((ClausewitzItem) currentNode).getNbLists() == 0 && ((ClausewitzItem) currentNode).getNbVariables() > 1) {
                     ((ClausewitzItem) currentNode).setSameLine(true);
                 }
 
@@ -422,8 +421,8 @@ public class ClausewitzParser {
     }
 
     public static ClausewitzObject convertBinary(CharArray reader, Charset charset, int skip, Map<Integer, String> tokens, List<String> objectNames,
-                                               Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) {
-        byte[] ch;
+                                                 Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) {
+        Short token;
         boolean isEquals = false;
         ClausewitzPObject currentNode = new ClausewitzItem();
         List<String> strings = new ArrayList<>();
@@ -431,39 +430,37 @@ public class ClausewitzParser {
         char[] skipped = new char[skip]; //Skip leader XXXbin
         reader.read(skipped);
 
-        while ((ch = readToken(reader)) != null) {
-            short token = ByteBuffer.wrap(ch).order(ByteOrder.LITTLE_ENDIAN).getShort();
+        while ((token = readToken(reader)) != null) {
+            BinaryToken binaryToken = BinaryToken.ofToken(token);
 
-            Optional<BinaryToken> binaryToken = BinaryToken.ofToken(token);
-
-            if (binaryToken.isPresent()) {
-                switch (binaryToken.get()) {
+            if (binaryToken != null) {
+                switch (binaryToken) {
                     case QUOTED_STRING -> {
-                        String string = readBinaryString(reader, charset).trim();
-                        strings.add("\"" + string + "\"");
+                        String string = readBinaryString(reader).trim();
+                        strings.add(ClausewitzUtils.QUOTE + string + ClausewitzUtils.QUOTE);
                     }
                     case NOT_QUOTED_STRING -> {
-                        String string = readBinaryString(reader, charset).trim();
+                        String string = readBinaryString(reader).trim();
                         strings.add(string);
                     }
                     case UNSIGNED_INT -> {
-                        long value = readBinaryUnsignedInt(reader, charset);
+                        long value = readBinaryUnsignedInt(reader);
                         strings.add(Long.toString(value));
                     }
                     case UNSIGNED_LONG -> {
-                        String value = readBinaryUnsignedLong(reader, charset);
+                        String value = readBinaryUnsignedLong(reader);
                         strings.add(value);
                     }
                     case INT -> {
-                        long value = readBinaryInt(reader, charset);
-                        strings.add(Long.toString(value));
+                        int value = readBinaryInt(reader);
+                        strings.add(Integer.toString(value));
                     }
                     case FLOAT -> {
-                        float value = readBinaryFloat(reader, charset);
+                        float value = readBinaryFloat(reader);
                         strings.add(Float.toString(value));
                     }
                     case DOUBLE -> {
-                        double value = readBinaryDouble(reader, charset);
+                        double value = readBinaryDouble(reader);
                         strings.add(Double.toString(value));
                     }
                     case BOOL -> {
@@ -485,10 +482,12 @@ public class ClausewitzParser {
                         }
                         isEquals = false;
                         ClausewitzPObject finalCurrentNode = currentNode;
-                        listeners.entrySet()
-                                 .stream()
-                                 .filter(entry -> entry.getKey().test(finalCurrentNode))
-                                 .forEach(entry -> entry.getValue().accept(finalCurrentNode.getName()));
+
+                        for (Entry<Predicate<ClausewitzPObject>, Consumer<String>> entry : listeners.entrySet()) {
+                            if (entry.getKey().test(finalCurrentNode)) {
+                                entry.getValue().accept(finalCurrentNode.getName());
+                            }
+                        }
                     }
                     case END -> {
                         if (!strings.isEmpty()) {
@@ -520,7 +519,7 @@ public class ClausewitzParser {
                 String s = tokens.get((int) token);
 
                 if (s == null) {
-                    s = new String(ch, charset);
+                    s = new String(tokenToBytes(token), charset);
                 }
 
                 strings.add(s);
@@ -545,7 +544,7 @@ public class ClausewitzParser {
         return currentNode;
     }
 
-    private static byte[] readToken(CharArray reader) {
+    private static Short readToken(CharArray reader) {
         byte first = (byte) reader.read();
         byte second = (byte) reader.read();
 
@@ -553,13 +552,45 @@ public class ClausewitzParser {
             return null;
         }
 
-        return new byte[] {first, second};
+        return (short) (((second & 0xFF) << 8) + (first & 0xFF));
     }
 
-    private static String readBinaryString(CharArray reader, Charset charset) {
-        char[] lenBytes = new char[2];
-        reader.read(lenBytes);
-        short len = ByteBuffer.wrap(new String(lenBytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    private static short readShortLittle(CharArray reader) {
+        byte first = (byte) reader.read();
+        byte second = (byte) reader.read();
+
+        return (short) (((second & 0xFF) << 8) + (first & 0xFF));
+    }
+
+    private static int readIntLittle(CharArray reader) {
+        byte first = (byte) reader.read();
+        byte second = (byte) reader.read();
+        byte third = (byte) reader.read();
+        byte forth = (byte) reader.read();
+
+        return (first & 0xFF) | ((second & 0xFF) << 8) | ((third & 0xFF) << 16) | ((forth & 0xFF) << 24);
+    }
+
+    private static long readLongLittle(CharArray reader) {
+        byte first = (byte) reader.read();
+        byte second = (byte) reader.read();
+        byte third = (byte) reader.read();
+        byte forth = (byte) reader.read();
+        byte fifth = (byte) reader.read();
+        byte sixth = (byte) reader.read();
+        byte seventh = (byte) reader.read();
+        byte eighth = (byte) reader.read();
+
+        return ((long) first & 0xFF) | (((long) second & 0xFF) << 8) | (((long) third & 0xFF) << 16) | (((long) forth & 0xFF) << 24) |
+               (((long) fifth & 0xFF) << 32) | (((long) sixth & 0xFF) << 40) | (((long) seventh & 0xFF) << 48) | (((long) eighth & 0xFF) << 56);
+    }
+
+    private static byte[] tokenToBytes(short token) {
+        return new byte[]{(byte) (token & 0xff), (byte) ((token >> 8) & 0xff)};
+    }
+
+    private static String readBinaryString(CharArray reader) {
+        short len = readShortLittle(reader);
 
         char[] string = new char[len];
         reader.read(string);
@@ -570,39 +601,28 @@ public class ClausewitzParser {
         return reader.read() == 0;
     }
 
-    private static long readBinaryUnsignedInt(CharArray reader, Charset charset) {
-        char[] bytes = new char[4];
-        reader.read(bytes);
-
-        return Integer.toUnsignedLong(ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getInt());
+    private static long readBinaryUnsignedInt(CharArray reader) {
+        return Integer.toUnsignedLong(readIntLittle(reader));
     }
 
-    private static long readBinaryInt(CharArray reader, Charset charset) {
-        char[] bytes = new char[4];
-        reader.read(bytes);
-
-        return ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+    private static int readBinaryInt(CharArray reader) {
+        return readIntLittle(reader);
     }
 
-    private static float readBinaryFloat(CharArray reader, Charset charset) {
-        char[] bytes = new char[4];
-        reader.read(bytes);
-
-        return ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getInt() / 1_000f;
+    private static float readBinaryFloat(CharArray reader) {
+        return readIntLittle(reader) / 1_000f;
     }
 
-    private static double readBinaryDouble(CharArray reader, Charset charset) {
-        char[] bytes = new char[8];
-        reader.read(bytes);
+    private static double readBinaryDouble(CharArray reader) {
+        double d = readIntLittle(reader) / 65_536d * 2;
 
-        return ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getInt() / 65_536d * 2;
+        reader.read(4, 0); //for double need to read 8 bytes
+
+        return d;
     }
 
-    private static String readBinaryUnsignedLong(CharArray reader, Charset charset) {
-        char[] bytes = new char[8];
-        reader.read(bytes);
-
-        return Long.toUnsignedString(ByteBuffer.wrap(new String(bytes).getBytes(charset)).order(ByteOrder.LITTLE_ENDIAN).getLong());
+    private static String readBinaryUnsignedLong(CharArray reader) {
+        return Long.toUnsignedString(readLongLittle(reader));
     }
 
     private static String readBinaryColor(CharArray reader) {
