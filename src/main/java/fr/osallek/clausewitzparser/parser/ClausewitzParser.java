@@ -111,6 +111,8 @@ public class ClausewitzParser {
 
         try (InputStream stream = zipFile.getInputStream(zipEntry)) {
             root = parse(new CharArray(stream, charset), skip, listeners);
+        } catch (CharacterCodingException e) {
+            throw new ClausewitzParseException(e);
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
         }
@@ -253,6 +255,8 @@ public class ClausewitzParser {
 
         try (InputStream stream = zipFile.getInputStream(zipEntry);) {
             readSingleObject(new CharArray(stream, charset), skip, root, objectNames);
+        } catch (CharacterCodingException e) {
+            throw new ClausewitzParseException(e);
         } catch (IOException e) {
             LOGGER.error("An error occurred while trying to read entry {} from file {}: {} !", zipEntry.getName(), zipFile.getName(), e.getMessage(), e);
         }
