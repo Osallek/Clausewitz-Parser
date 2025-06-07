@@ -43,16 +43,25 @@ public class ClausewitzParser {
 
     public static ClausewitzItem parse(File file, int skip, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) {
         try {
-            return parse(file, skip, listeners, CharsetDetector.detect(new BufferedInputStream(new FileInputStream(file))));
-        } catch (IOException | ClausewitzParseException ignored) {
-            try {
-                return parse(file, skip, listeners, StandardCharsets.ISO_8859_1);
-            } catch (ClausewitzParseException e) {
-                if (CharacterCodingException.class.equals(e.getCause().getClass())) {
+            return parse(file, skip, listeners, StandardCharsets.ISO_8859_1);
+        } catch (ClausewitzParseException e) {
+            if (CharacterCodingException.class.equals(e.getCause().getClass())) {
+                try {
                     return parse(file, skip, listeners, StandardCharsets.UTF_8);
-                } else {
-                    throw e;
+                } catch (ClausewitzParseException e1) {
+                    try {
+                        if (CharacterCodingException.class.equals(e1.getCause().getClass())) {
+                            return parse(file, skip, listeners, CharsetDetector.detect(new BufferedInputStream(new FileInputStream(file))));
+                        } else {
+                            throw e1;
+                        }
+                    } catch (IOException e2) {
+                        LOGGER.error("An error occurred while trying to read file {}: {} !", file.getAbsolutePath(), e2.getMessage(), e2);
+                        throw e;
+                    }
                 }
+            } else {
+                throw e;
             }
         }
     }
@@ -590,7 +599,7 @@ public class ClausewitzParser {
     }
 
     private static byte[] tokenToBytes(short token) {
-        return new byte[]{(byte) (token & 0xff), (byte) ((token >> 8) & 0xff)};
+        return new byte[] {(byte) (token & 0xff), (byte) ((token >> 8) & 0xff)};
     }
 
     private static String readBinaryString(CharArray reader) {
